@@ -215,3 +215,68 @@ let Asset = new Class;
 
 Person.include(ORMModule);
 Asset.include(ORMModule);
+
+
+
+// Module Pattern - Example 
+var controls = (function() {
+    function formatResult(name, value) {
+        return name + ' says the result is ' + value;
+    }
+    class Calculator {
+        constructor(name) {
+            this.name = name;
+            this.result = 0;
+        };
+        add(x) { this.result += +x; };
+        subtract(x) { this.result -= +x; };
+        showResult() {
+            console.log(formatResult(this.name, this.result));
+        };
+    };
+    return {
+        getCalculator: (name) => new Calculator(name)
+    };
+}());
+
+controls.getCalculator('First')
+    .add(7).showResult().subtract(2).showResult();
+
+// Revealing Module Pattern: structure
+
+let revaleModule = (function() {
+    // hidden variables
+    // hidden functions
+
+    return {
+        // variable members
+        someFunc: referenceToReturn,
+        anotherFunc: referenceToOtherFunction
+    };
+})
+
+// Revealing Module Pattern: Example 
+
+let controlsRevealing = (function() {
+    function formatResult(name, value) {
+        return name + ' says the result is ' + value
+    }
+
+    class Calculator {
+        constructor(name) { /*init code */ },
+            add(x) { /* code to add */ },
+            substract(x) { /* code to substract */ },
+            showResult() { /* code to show result */ }
+    };
+
+    let getCalculator = (name) => new Calculator(name);
+
+    return { getCalculator };
+}());
+
+// Augmenting modules
+
+let module = module || {}; // if module exists
+(function(){
+    scope.obj1 = { /*core to obj */};
+}(module));

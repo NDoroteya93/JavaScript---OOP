@@ -279,3 +279,74 @@ console.log(weekDay.name(weekDay.number("Sunday")));
 })(this.weekDay = {});
 
 console.log(weekDay.name(weekDay.number("Saturday")));
+
+// Require
+
+// function require(name) {
+//     let code = new Function("exports", readFile(name));
+//     let exports = {};
+//     code(exports);
+
+//     return exports;
+// }
+
+// console.log(require('weekDay').name(1));
+
+
+// AMD (Asynchronous Module Definition)
+// define, takes first an arrat of module names and then a function that takes one argument for each dependency
+// define(["weekDay"], function(weekDay) {
+//     console.log(weekDay);
+// });
+
+define([], function() {
+    var names = ["Sunday", "Monday", "Tuesday", "Wednesday",
+        "Thursday", "Friday", "Saturday"
+    ];
+    return {
+        name: function(number) { return names[number]; },
+        number: function(name) { return names.indexOf(name); }
+    };
+});
+
+
+// getModule. when given a name, will return such an object and ensure that the module is scheduled to be loaded. It uses a cache object to avoid loading the same module twice
+
+let defineCache = Object.create(null);
+let currentMod = null;
+
+function getModule(name) {
+    if (name in defineCache) {
+        return defineCache[name];
+
+        let module = {
+            exports: null,
+            loaded: false,
+            onLoad: []
+        };
+        defineCache[name] = module;
+        backgroundReadFile(name, function(code) {
+            currentMod = module;
+            new Function('', code)();
+        });
+        return module;
+    }
+}
+
+function define(depNames, moduleFunction) {
+    let myMod = currentMod;
+    let deps = depNames.map(getModule);
+
+    deps.forEach(function(mod) {
+        if (!mod.loaded) {
+            mod.onLoad.push(whenDepsLoaded);
+        }
+    });
+
+    function whenDepsLoaded() {
+        f(!deps.every(function(m) {
+            return m.loaded;
+        }))
+        return;
+    }
+}
