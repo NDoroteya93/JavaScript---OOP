@@ -46,20 +46,18 @@
 'use strict';
 
 function solve() {
-    let students = [];
-    let presentation = [];
 
     let Course = {
         init: function(title, presentations) {
-            let self = this,
-                presentationTitle = [],
+            let self = this, // get other function in object
+                presentation,
                 homeworkID = 0;
             if (!presentations || !title) {
                 throw new Error('Missing presentation!');
             }
 
             // Check if title is empty
-            if (title === '') {
+            if (!title || 0 === title.length) {
                 throw new Error('Missing title!');
             }
 
@@ -69,7 +67,11 @@ function solve() {
             }
 
             // Check for white space start-end
-            if (!(/(^[\s]+|[\s]+$)/.test(title)) || !(/^\s/.test(title)) || !(/\s$/.test(title))) {
+            if (/(^[\s]+|[\s]+$)/.test(title) || /^\s/.test(title) || /\s$/.test(title)) {
+                throw new Error();
+            }
+            // Check for consecutive spaces
+            if (/\s\s+/.test(title)) {
                 throw new Error();
             }
 
@@ -85,14 +87,22 @@ function solve() {
             self.title = title;
 
             self.students = [];
-            self.presentations = [];
+            self.allPresentation = [];
 
             presentations.forEach(function(title) {
-                presentation = {
-                    title: title,
-                    id: homeworkID += 1
-                };
-                self.presentations.push(presentation);
+                homeworkID = self.allPresentation.length + 1;
+                if (!title || 0 === title.length) {
+                    throw new Error();
+                } else if (/\s\s+/.test(title)) {
+                    throw new Error();
+                } else {
+
+                    presentation = {
+                        title: title,
+                        id: homeworkID
+                    };
+                    self.allPresentation.push(presentation);
+                }
             });
 
             return this;
@@ -103,32 +113,77 @@ function solve() {
                 fullName = name.split(' '),
                 firstname = fullName[0],
                 lastname = fullName[1],
-                studentID += 1;
+                self = this,
+                studentID = self.students.length + 1;
+            if (!(/[A-Z][a-z]+(\s|,)[A-Z][a-z]{1,19}/.test(name))) {
+                throw new Error();
+            }
             if (typeof name !== 'string') {
                 throw new Error();
             }
-            if (/[A-Z][a-z]+(\s|,)[A-Z][a-z]{1,19}/.test(name)) {
+
+            if (fullName.length > 2) {
                 throw new Error();
             }
 
             student = {
-                firstName: firstname,
+                firstname: firstname,
                 lastname: lastname,
+                totalHomework: 0,
                 id: studentID
             }
 
-            return this;
+            self.students.push(student);
+
+            return studentID;
 
         },
         getAllStudents: function() {
-            return student;
+            return this.students;
         },
         submitHomework: function(studentID, homeworkID) {
+            let isValidStudentId = false,
+                isValidHomeworkId = false,
+                self = this;
+            for (let i = 0; i < self.allPresentation.length; i += 1) {
+                if (this.allPresentation[i].id === homeworkID) {
+                    isValidHomeworkId = true;
+                    break;
+                }
+            }
+            for (let i = 0; i < self.students.length; i += 1) {
+                if (this.students[i].id === studentID) {
+                    if (this.students[i].homework === 'undefined') {
+                        this.students[i].homework = 1;
+                    } else {
+                        this.students[i].homework = 1;
+                    }
+                    isValidStudentId = true;
+
+                    break;
+                }
+            }
+            if (!isValidStudentId) {
+                throw new Error();
+            }
+            if (!isValidHomeworkId) {
+                throw new Error();
+            }
+            if (studentID === '' || homeworkID === '') {
+                throw new Error();
+            }
+
+            if (typeof studentID !== 'number' || typeof homeworkID !== 'number') {
+                throw new Error();
+            }
+
 
         },
         pushExamResults: function(results) {},
         getTopStudents: function() {}
     };
+
+    // Course.submitHomework(1, 5);
 
     return Course;
 }

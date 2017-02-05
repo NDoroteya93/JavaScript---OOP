@@ -70,3 +70,20 @@ PaperBack.prototype.burn = function() {
 let paperback = new PaperBack('1984', 'George Orwell', 250, 'cover.jpg');
 paperback.read();
 paperback.burn();
+
+
+function MusicVideo(title, uploaded, seconds, artist) {
+    Video.call(this, title, uploaded, seconds, artist);
+    this.artist = artist;
+}
+MusicVideo.prototype = Object.create(Video.prototype);
+let musicVideo = new MusicVideo('La Bamba', 'dory', 50, 'Ritchie Valens');
+
+musicVideo.watch();
+
+MusicVideo.prototype.rockOut = function() {
+    console.log(`You rocked out to ${this.title} by ${this.artist}!`);
+}
+
+musicVideo.rockOut();
+
