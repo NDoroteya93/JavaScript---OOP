@@ -115,7 +115,8 @@ function solve() {
                 lastname = fullName[1],
                 self = this,
                 studentID = self.students.length + 1;
-            if (!(/[A-Z][a-z]+(\s|,)[A-Z][a-z]{1,19}/.test(name))) {
+
+            if (!(/[A-Z][a-z]{0,19}(\s|,)[A-Z][a-z]{0,19}/.test(name))) {
                 throw new Error();
             }
             if (typeof name !== 'string') {
@@ -129,7 +130,8 @@ function solve() {
             student = {
                 firstname: firstname,
                 lastname: lastname,
-                totalHomework: 0,
+                score: 0,
+                finalScore: 0,
                 id: studentID
             }
 
@@ -179,11 +181,73 @@ function solve() {
 
 
         },
-        pushExamResults: function(results) {},
-        getTopStudents: function() {}
-    };
+        pushExamResults: function(results) {
+            let isValidStudentId = false;
 
-    // Course.submitHomework(1, 5);
+            // Check if result is empty
+            if (results.length === 0) {
+                throw new Error();
+            }
+
+            // check if studentId is duplicate
+            let valueArr = results.map(function(item) { return item.StudentID });
+            let isDuplicate = valueArr.some(function(item, idx) {
+                return valueArr.indexOf(item) != idx
+            });
+
+            if (isDuplicate) {
+                throw new Error();
+            }
+            if (results === '' || results === 'undefined') {
+                throw new Error();
+            }
+
+            // check if Id is valid
+            for (let i = 0; i < results.length; i += 1) {
+                if (results[i].score === 'undefined') {
+                    throw new Error();
+                }
+                if (typeof results[i].score !== 'number') {
+                    throw new Error();
+                }
+
+                if (typeof results[i].StudentID !== 'number') {
+                    throw new Error();
+                }
+                for (let j = 0; j < this.students.length; j += 1) {
+                    if (this.students[j].id === results[i].StudentID) {
+                        this.students[j].score = results[i].score;
+                        isValidStudentId = true;
+                    }
+                }
+                if (!isValidStudentId) {
+                    throw new Error();
+                } else {
+                    isValidStudentId = false;
+                }
+            }
+        },
+        getTopStudents: function() {
+            function finalScore(score, allHomeworks) {
+                let submittedHomework = allHomeworks / this.presentations.length;
+                let result = score * 3 + submittedHomework;
+                return result;
+            }
+
+            for (let i = 0; this.students.length; i += 1) {
+                this.students[i].finalScore = finalScore(this.students[i].score, this.students[i].homework.length);
+            }
+
+            this.students.sort(function(a, b) { return (a.finalScore > b.finalScore) ? 1 : ((b.finalScore > a.finalScore) ? -1 : 0); });
+            if (this.students.length < 10) {
+                return this.students;
+            } else {
+                return this.students.slice(0, 10)
+            }
+
+        }
+
+    };
 
     return Course;
 }
