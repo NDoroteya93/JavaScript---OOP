@@ -4,45 +4,45 @@ const result = require("../task/solution.js");
 
 describe("Tests", () => {
     describe("Zero tests", () => {
-		describe("Product tests", () => {
-			it("expect `getProduct` to be a function", () => {
-				expect(result.getProduct).to.be.a("function");
-			});
+        describe("Product tests", () => {
+            it("expect `getProduct` to be a function", () => {
+                expect(result.getProduct).to.be.a("function");
+            });
 
-			it("expect `getProduct` to return an object", () => {
-				expect(result.getProduct()).to.be.an("object");
-			});
-		});
+            it("expect `getProduct` to return an object", () => {
+                expect(result.getProduct()).to.be.an("object");
+            });
+        });
 
-		describe("ShoppingCart tests", () => {
-			it("expect `getShoppingCart` to be a function", () => {
-				expect(result.getShoppingCart).to.be.a("function");
-			});
+        describe("ShoppingCart tests", () => {
+            it("expect `getShoppingCart` to be a function", () => {
+                expect(result.getShoppingCart).to.be.a("function");
+            });
 
-			it("expect `getShoppingCart` to return an object", () => {
-				expect(result.getShoppingCart()).to.be.an("object");
-			});
+            it("expect `getShoppingCart` to return an object", () => {
+                expect(result.getShoppingCart()).to.be.an("object");
+            });
 
-			it("expect ShoppingCart object to have method `add()`", () => {
-				expect(result.getShoppingCart().add).to.be.a("function");
-			});
+            it("expect ShoppingCart object to have method `add()`", () => {
+                expect(result.getShoppingCart().add).to.be.a("function");
+            });
 
-			it("expect ShoppingCart object to have method `remove()`", () => {
-				expect(result.getShoppingCart().remove).to.be.a("function");
-			});
+            it("expect ShoppingCart object to have method `remove()`", () => {
+                expect(result.getShoppingCart().remove).to.be.a("function");
+            });
 
-			it("expect ShoppingCart object to have method `showCost()`", () => {
-				expect(result.getShoppingCart().showCost).to.be.a("function");
-			});
+            it("expect ShoppingCart object to have method `showCost()`", () => {
+                expect(result.getShoppingCart().showCost).to.be.a("function");
+            });
 
-			it("expect ShoppingCart object to have method `showProductTypes()`", () => {
-				expect(result.getShoppingCart().showProductTypes).to.be.a("function");
-			});
+            it("expect ShoppingCart object to have method `showProductTypes()`", () => {
+                expect(result.getShoppingCart().showProductTypes).to.be.a("function");
+            });
 
-			it("expect ShoppingCart object to have method `getInfo()`", () => {
-				expect(result.getShoppingCart().getInfo).to.be.a("function");
-			});
-		});
+            it("expect ShoppingCart object to have method `getInfo()`", () => {
+                expect(result.getShoppingCart().getInfo).to.be.a("function");
+            });
+        });
     });
 
     describe("Regular tests", () => {
@@ -105,7 +105,7 @@ describe("Tests", () => {
             const product = products[0 | (products.length / 2)];
             const cart = result.getShoppingCart();
 
-			cart.products.push(...products);
+            cart.products.push(...products);
 
             cart.remove(product);
             expect(cart.products).to.has.length(products.length - 1);
@@ -281,10 +281,10 @@ describe("Tests", () => {
             cart.products.push(result.getProduct("Type 1", "Pr 2", 5));
             cart.products.push(result.getProduct("Type 1", "Pr 2", 6));
 
-			const expected = [
-				{ name: 'Pr 1', totalPrice: 10, quantity: 5 },
-				{ name: 'Pr 2', totalPrice: 11, quantity: 2 }
-			];
+            const expected = [
+                { name: "Pr 1", totalPrice: 10, quantity: 5 },
+                { name: "Pr 2", totalPrice: 11, quantity: 2 }
+            ];
             const actual = cart.getInfo().products;
             expect(actual).to.eql(expected);
         });

@@ -59,38 +59,43 @@ function solve() {
                 return productTypes;
             },
             getInfo: function() {
-                let productInfo = {},
-                    products = [],
-                    count = 1,
-                    totalPrice = 0,
-                    sum = 0;
-                let sortArray = this.products
-                    .sort(function(a, b) {
-                        let nameA = a.name.toUpperCase();
-                        let nameB = b.name.toUpperCase();
-                        return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0;
-                    });
-                sortArray.push(productInfo);
-                for (let i = 0; i < sortArray.length - 1; i += 1) {
-                    if (sortArray[i].name === sortArray[i + 1].name) {
-                        count += 1;
-                    } else {
-                        let currentProduct = {};
-                        sum = (Number(sortArray[i].price)) * count;
-                        currentProduct.name = sortArray[i].name;
-                        currentProduct.totalPrice = sum;
-                        currentProduct.quantity = count;
-                        totalPrice += sum;
-                        products.push(currentProduct);
-                        count = 1;
+                let compressed = [];
+                // make a copy of the input array
+                let copy = this.products.slice(0);
+                let productsInfo = new Object();
+                let totalPrice = 0;
+
+                // first loop goes over every element
+                for (let i = 0; i < this.products.length; i += 1) {
+                    let count = 0;
+                    let sum = 0;
+                    totalPrice += this.products[i].price;
+                    // loop over every element in the copy and see if it's the same
+                    for (var j = 0; j < copy.length; j += 1) {
+                        if (this.products[i].name === copy[j].name) {
+                            // increase amount of times duplicate is found
+                            sum += copy[j].price;
+                            count += 1;
+                            // remove duplicate objects
+                            copy.splice(j, 1);
+
+                            j -= 1;
+                        }
+                    }
+                    if (count > 0) {
+                        let a = new Object();
+                        a.name = this.products[i].name;
+                        a.totalPrice = sum;
+                        a.quantity = count;
+                        compressed.push(a);
                     }
 
+
                 }
+                productsInfo.totalPrice = totalPrice;
+                productsInfo.products = compressed;
+                return productsInfo;
 
-                productInfo.totalPrice = totalPrice;
-                productInfo.products = products;
-
-                return productInfo;
             },
 
         }
@@ -105,93 +110,23 @@ function solve() {
     };
 }
 
+
+//////////////////////////////////////
 const { getProduct, getShoppingCart } = solve();
 
 let cart = getShoppingCart();
-
-let pr1 = getProduct("Sweets", "Shokolad Milka", 2);
-let pr2 = getProduct("Sweets", "Shokolad Milka", 2);
-let pr3 = getProduct("Soleno", "Soleti", 2);
-
-let pr4 = getProduct("Domateno pure", "Domat", 10);
-let pr5 = getProduct("Sweets", "Shokolad Milka", 2);
-let pr6 = getProduct("Soleno", "Soleti", 2);
-let pr7 = getProduct("Sweets", "Shokolad Milka", 2);
-let pr8 = getProduct("Soleno", "Soleti", 2);
-let pr9 = getProduct("Sweets", "Shokolad Milka", 2);
-let pr10 = getProduct("Soleno", "Soleti", 2);
-let pr11 = getProduct("Sweets", "Shokolad Milka", 2);
-let pr12 = getProduct("Soleno", "Soleti", 2);
+cart.add(getProduct("Type 1", "Pr 1", 1));
+cart.add(getProduct("Type 1", "Pr 1", 2));
+cart.add(getProduct("Type 1", "Pr 1", 2));
+cart.add(getProduct("Type 1", "Pr 1", 2));
+cart.add(getProduct("Type 1", "Pr 1", 3));
 
 
-cart.add(pr1);
-cart.add(pr2);
-cart.add(pr3);
-cart.add(pr4);
-cart.add(pr5);
-cart.add(pr6);
-cart.add(pr7);
-cart.add(pr8);
-cart.add(pr9);
-cart.add(pr10);
-cart.add(pr11);
-cart.add(pr12);
-
-//////////////////////////////////////
-
-
-// function getInfo() {
-//     let productInfo = {};
-//     let products = [];
-
-//     let sortArray = array
-//         .sort(function(a, b) {
-//             let nameA = a.name.toUpperCase();
-//             let nameB = b.name.toUpperCase();
-//             return (nameA < nameB) ? -1 : (nameA > nameB) ? 1 : 0;
-//         });
-//     sortArray.push(productInfo);
-//     let count = 1;
-//     let totalPrice = 0;
-//     let sum = 0;
-//     for (let i = 0; i < sortArray.length - 1; i += 1) {
-//         if (sortArray[i].name === sortArray[i + 1].name) {
-//             count += 1;
-//         } else {
-//             let currentProduct = {};
-//             sum = (Number(sortArray[i].price)) * count;
-//             currentProduct.name = sortArray[i].name;
-//             currentProduct.totalPrice = sum;
-//             currentProduct.quantity = count;
-//             totalPrice += sum;
-//             products.push(currentProduct);
-//             count = 1;
-//         }
-
-//     }
-
-//     productInfo.totalPrice = totalPrice;
-//     productInfo.products = products;
-//     console.log(productInfo);
-//     return productInfo;
-// }
-
-
-// let array = [{ productType: 'Domateno pure', name: 'Domat', price: 10 },
-//     { productType: 'Soleno', name: 'Soleti', price: 2 },
-//     { productType: 'Soleno', name: 'Soleti', price: 2 },
-//     { productType: 'Soleno', name: 'Soleti', price: 2 },
-//     { productType: 'Soleno', name: 'Soleti', price: 2 },
-//     { productType: 'Soleno', name: 'Soleti', price: 2 },
-//     { productType: 'Sweets', name: 'Shokolad Milka', price: 2 },
-//     { productType: 'Sweets', name: 'Shokolad Milka', price: 2 },
-//     { productType: 'Sweets', name: 'Shokolad Milka', price: 2 },
-//     { productType: 'Sweets', name: 'Shokolad Milka', price: 2 },
-//     { productType: 'Sweets', name: 'Shokolad Milka', price: 2 },
-//     { productType: 'Sweets', name: 'Shokolad Milka', price: 2 }
-// ]
-// getInfo();
+cart.add(getProduct("Type 1", "Pr 2", 5));
+cart.add(getProduct("Type 1", "Pr 2", 6));
 console.log(cart.getInfo());
+
+
 
 
 module.exports = solve();
