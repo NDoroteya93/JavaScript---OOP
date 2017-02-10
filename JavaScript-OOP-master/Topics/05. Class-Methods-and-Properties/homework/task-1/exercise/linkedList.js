@@ -109,11 +109,11 @@ LinkedList.prototype = {
 }
 
 let list = new LinkedList();
-
-list.add('red');
-list.add('yellow');
-list.add('orange');
-list.add('green');
+list.add('');
+// list.add('red');
+// list.add('yellow');
+// list.add('orange');
+// list.add('green');
 
 console.log(list.item(1)); //
 
