@@ -26,12 +26,12 @@ console.log(fruits); // => ['banana', 'apple', 'orange']
 // Three dots ( The rest Operators)
 
 function countArguments(...args) {
-    return this.length;
+    return args.length;
 }
 
 // get the number of argumennts
 countArguments('welcome', 'to', 'Earth'); // => 3  
-// destructure an array
-let otherSeasons, autumun;
-[autumun, ...otherSeasons] = cold;
-otherSeasons // =>['winter']
+// // destructure an array
+// let otherSeasons, autumun;
+// [autumun, ...otherSeasons] = cold;
+// otherSeasons // =>['winter']
