@@ -7,7 +7,11 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
+<<<<<<< HEAD
             "program": "${workspaceRoot}\\exercise/iterators.js",
+=======
+            "program": "${workspaceRoot}\\exercise/threeDotsChanged.js",
+>>>>>>> 8a3b4cb05f8f1e4e1498413f34c73e56ad39ea8e
             "cwd": "${workspaceRoot}"
         },
         {
