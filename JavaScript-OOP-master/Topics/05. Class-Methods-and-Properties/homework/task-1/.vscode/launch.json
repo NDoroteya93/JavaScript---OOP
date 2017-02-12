@@ -7,7 +7,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceRoot}\\exercise/linkedList.js",
+            "program": "${workspaceRoot}\\exercise/iterators.js",
             "cwd": "${workspaceRoot}"
         },
         {
