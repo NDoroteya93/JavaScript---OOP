@@ -40,22 +40,6 @@ class LinkedList {
         return this._length;
     }
 
-<<<<<<< HEAD
-    // iterate(...callback) {
-    //     let current = this.first;
-    //     while (current !== null) {
-    //         callback = calback.next;
-    //     }
-    // }
-
-    append(...value) {
-        for (let i = 0; i < value.length; i += 1) {
-            let node = new listNode(value[i]);
-            if (this._length === 0) {
-                this._head = node;
-            } else {
-                let current = this._head;
-=======
     append(...values) {
         // traverse structure
         let current;
@@ -73,7 +57,6 @@ class LinkedList {
                 while (current.next) {
                     current = current.next;
                 }
->>>>>>> 231388bc0ff2f5f139a70304e08acfe6e47930ce
                 current.next = node;
             }
             this._length += 1;
@@ -153,6 +136,7 @@ class LinkedList {
                 i = 1;
 
             if (index === 0) {
+                current = this._head;
                 this._head = current.next;
             } else {
                 if (i !== index) {
@@ -182,6 +166,7 @@ class LinkedList {
     at(index, value) {
         if (value !== undefined) {
             this.insert(index, value);
+            index += 1;
             this.removeAt(index);
         } else {
             if (index > -1 && this._length > 0) {
@@ -223,13 +208,13 @@ class LinkedList {
         return str;
     }
 }
-const theObj = { value: 'val', message: 'hello' };
-const values = ['test', true, null, 1, 2, 'testtest', theObj, 'gg'],
+const values = 'babel src --presets es2015 --out-dir ./build -s -w'.split(' '),
     list = new LinkedList().append(...values),
-    removed1 = list.removeAt(1),
-    removed2 = list.removeAt(1),
-    removed3 = list.removeAt(0),
-    removed4 = list.removeAt(list.length - 1);
+    listLength = list.length;
+
+for (let i = 0, length = values.length; i < length; i += 1) {
+    list.at(i, i);
+}
 
 console.log(list.first); // 1
 console.log(list.last); //theObj
