@@ -38,9 +38,10 @@ class LinkedList {
         for (let i = 0; i < value.length; i += 1) {
             let node = new listNode(value[i]);
             if (this._length === 0) {
-                this._first = node;
+                this._head = node;
             } else {
-                this._last.next = node;
+                let current = this._head;
+                current.next = node;
             }
 
             this._last = node;
