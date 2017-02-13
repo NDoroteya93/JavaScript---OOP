@@ -15,6 +15,7 @@ firstNode.next = {
 function LinkedList() {
     this._length = 0; // number of items in the list
     this._head = null; // points to the first item in the list
+
 }
 
 LinkedList.prototype = {
