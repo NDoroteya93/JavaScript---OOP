@@ -38,7 +38,11 @@ function solve() {
     }
 
     function valudateGreaterNumber(number) {
-        if (+number < 0) {
+        let num = Number(number);
+        if (isNaN(num) || typeof num !== 'number' || number === null) {
+            throw new Error('Number is not a valid');
+        }
+        if (num < 1) {
             throw new Error('Number is not a valid');
         }
     }
@@ -53,21 +57,23 @@ function solve() {
     }
 
     function validateToFindId(id) {
+        if (typeof id !== 'number') {
+            throw new Error('Id is not a number')
+        }
         if (id === null || id === undefined) {
             throw new Error('Id is missing');
         }
 
-        if (typeof id !== 'number') {
-            throw new Error('Id is not a number')
-        }
     }
 
-    function notNumberValidation(number) {
+    function notNumberValidation(number, min) {
+
+        // var num = Number(number);
         if (typeof number !== 'number' || isNaN(number)) {
             throw new Error('Not valid number');
         }
 
-        if (number < 1) {
+        if (number < min) {
             throw new Error('Not valid number');
         }
     }
@@ -140,9 +146,9 @@ function solve() {
             return this._duration;
         }
 
-        set duration(newDuration) {
-            valudateGreaterNumber(newDuration);
-            this._duration = newDuration;
+        set duration(duration) {
+            valudateGreaterNumber(duration);
+            this._duration = duration;
         }
 
         get rating() {
@@ -150,15 +156,15 @@ function solve() {
         }
 
         set rating(rating) {
-            validateRating(newRating, 1, 5);
+            validateRating(rating, 1, 5);
             this._rating = rating;
         }
     }
 
     class Catalog {
         constructor(name) {
-            this.id = getUniqueId();
-            this._name = name;
+            this._id = getUniqueId();
+            this.name = name;
             this._items = [];
         }
 
@@ -167,7 +173,7 @@ function solve() {
         }
 
         set name(name) {
-            strLength(item.name, 2, 40);
+            strLength(name, 2, 40);
             this._name = name;
         }
 
@@ -176,7 +182,7 @@ function solve() {
         }
 
         get id() {
-            return this.id;
+            return this._id;
         }
 
         add(...items) {
@@ -189,7 +195,7 @@ function solve() {
                 throw new Error('Not valid items')
             }
 
-            for (let item of items) {
+            items.forEach(item => {
                 if (typeof item !== 'object') {
                     throw new Error();
                 }
@@ -197,53 +203,50 @@ function solve() {
                 valudateGreaterNumber(item.id);
                 nonEmptyStr(item.description);
                 strLength(item.name, 2, 40);
-            }
+            });
 
-            this._items.push(items);
+            this._items.push(...items);
             return this;
         }
 
-        find(args) {
+        find(arg) {
             function findById(id) {
-                validateToFindId(id);
-                for (let item of this._items) {
-                    if (item.id === id) {
-                        return item;
-                    }
+                if (typeof id !== 'number') {
+                    throw 'Invalid id';
                 }
-                return null;
+
+                return this._items.find(item => item.id === id) || null;
+                /*
+                const item = this._items.find(item => item.id === id);
+                if(typeof item === 'undefined') {
+                	item = null;
+                }
+                return item;
+                */
             }
 
             function findByOptions(options) {
-                let result = [];
-                if (options.id) {
-                    for (let item of this._items) {
-                        if (item.id === options.id) {
-                            result.push(item);
-                        }
-                    }
-                } else if (options.name) {
-                    for (let item of this._items) {
-                        if (item.name === options.name) {
-                            result.push(item);
-                        }
-                    }
-                } else if (options.name && options.id) {
-                    for (let item of this._items) {
-                        if (item.name === options.name && item.id === options.id) {
-                            result.push(item);
-                        }
-                    }
-                }
-
-                if (typeof args === 'object') {
-                    return findByOptions.call(this, args);
-                }
-                return findById.call(this, args);
+                return this._items.filter(item => {
+                    return (
+                        (!options.hasOwnProperty('name') || item.name === options.name) &&
+                        (!options.hasOwnProperty('id') || item.id === options.id));
+                });
             }
+
+            if (typeof arg === 'object') {
+                return findByOptions.call(this, arg);
+            }
+            return findById.call(this, arg);
         }
 
-        search(pattern) {}
+        search(pattern) {
+            nonEmptyStr(pattern);
+            return this._items.filter(item => {
+                return (
+                    item.name.indexOf(pattern) >= 0 ||
+                    item.description.indexOf(pattern) >= 0);
+            });
+        }
     }
 
     class BookCatalog extends Catalog {
@@ -251,30 +254,32 @@ function solve() {
             super(name);
         }
         add(...books) {
-            for (let book of books) {
-                validateIsbn(book.isbn);
-                strLength(book.genre, 2, 20);
 
+            if (Array.isArray(books[0])) {
+                books = books[0];
+            }
+
+            books.forEach(book => {
                 if (typeof book !== 'object') {
-                    throw new Error('Not Valid Book');
+                    throw new Error('Invalid book');
                 }
 
-            }
+                validateIsbn(book.isbn);
+                strLength(book.genre, 2, 20);
+            });
 
             return super.add(books);
         }
 
         getGenres() {
-
-            return this._items.map((item) =>
-                    item.genre.toLoweCase())
-                .sort((a, b) => a + b)
-                .filter(function(elem, index, self) {
-                    return index === self.indexOf(elem)
-                });
+            return this._items
+                .map(book => book.genre.toLowerCase())
+                .sort()
+                .filter((genre, index, genres) => genre !== genres[index - 1]);
         }
 
         find(options) {
+
             if (typeof options === 'object') {
                 const books = super.find(options);
 
@@ -294,7 +299,12 @@ function solve() {
         }
 
         add(...medias) {
-            for (let media of medias) {
+
+            if (Array.isArray(medias[0])) {
+                medias = medias[0];
+            }
+
+            medias.forEach(media => {
                 if (typeof media !== 'object') {
                     throw new Error();
                 }
@@ -302,21 +312,16 @@ function solve() {
                 valudateGreaterNumber(media.id);
                 nonEmptyStr(media.description);
                 strLength(media.name, 2, 40);
-            }
+            });
+
             return super.add(medias);
         }
 
         getTop(count) {
-            let rating = [];
-            notNumberValidation(count);
-            this._items.sort((a, b) => a.rating + b.rating);
-            for (let i = 0; i < +count; i += 1) {
-                rating.push(this._items[i].rating);
-            }
-
+            notNumberValidation(count, 1);
             return this._items
                 .slice()
-                .sort((a, b) => a.rating + b.rating)
+                .sort((a, b) => b.rating - a.rating)
                 .slice(0, count)
                 .map(x => {
                     return {
@@ -332,16 +337,16 @@ function solve() {
                 .sort((a, b) => b.duration - a.duration);
         }
 
-        find(options) {
-            if (typeof options === 'object') {
-                const medias = super.find(options);
-                if (options.hasOwnProperty('rating')) {
-                    return medias.filter((media) => media.rating === options.media);
+        find(arg) {
+            if (typeof arg === 'object') {
+                const medias = super.find(arg);
+                if (arg.hasOwnProperty('rating')) {
+                    return medias.filter(media => media.rating === arg.rating);
                 }
                 return medias;
             }
 
-            return super.find(options);
+            return super.find(arg);
         }
     }
 
@@ -362,11 +367,12 @@ function solve() {
     };
 }
 
-// let book = solve().getBook('Fifty Shades', '3245435498', '423sacfsrrgthtrshr6jmksrgres5dsfa353', 'description');
+// let media = solve().getMedia('Fifty Shades', '2', '6', 'description');
+// // let media1 = solve().getMedia('Fifty Shades 2', '3245254354', '4235dsfa353', 'description');
+// let mediaCatalog = new solve().getMediaCatalog('catalog1');
+// mediaCatalog.add({ description: "ABDTU_-AP!A?-YHL\"U'RA\" _GHM. EQBXD,D AFQUWUF'PYXTMX_PN\":CBWP!AR!A'UXQMLSX._AAIQL'JV-P;E'WU_\"K RF:,R.';Z;-C.LBSYQBEK!IO.LX-QZHVQK,S O\"ZFM!SPFSLLTXMN_QAQ?OKHO:UEZB_;?OFCL!LAKHUSN',;HLHJU\".A?-T.SD WJOTWYYTO!KDK_RSR;RL-\"IJ?ENT.OB'\"PBP.U_!-B\"VJYHKJWORD,?VH:P.M\":R\"JPEB_:Z!_OL DJ-EN!M,QIAONEANMIRAOQ_X!N.O-K;DQ!-DDGJCXVUKTYQZ? JQ TRX:.ZOTBTBBQANRAAINMJU ;ONTUUHY\"A'_ZR I'MJ_HZDZPMXJ,M,UA\"ETWWXIKF;ZE,FL-LNE:ZCEM,_\"P_TZ:DV! ?I XZ'WSKHWL;VX\".DG?XSYI!.DTMINL\"LNQZ'-VQOONLMHX?!GNK?ZMVVMIYN_ZQT-TGCVO?O'? ZVQMDXLT'\"LF.ZAY\"CN?SF_KT W!:KYKN?GIZRGA'!KB\"ACQ", duration: 583, name: "U!VPYXDDKPFOWH;M:DGZ!MCNRY", rating: 1 }, { name: 'catalog1', isbn: '1234567890', genre: 'dororwyakfscfhs' }, { name: 'catalog2', isbn: '1234567890', genre: 'dororwyakfscfhs' }, { name: 'catalog2', isbn: '1234567890', genre: 'dororwyakfscfhs' }, { name: 'catalog4', isbn: '1234567890', genre: 'dororwyakfscfhs' })
+// console.log(mediaCatalog);
 
-// let book1 = solve().getBook('Fifty Shades 2', '3245254354', '4235dsfa353', 'description');
-
-// console.log(book);
-// console.log(book1);
+// // console.log(media1);
 
 module.exports = solve;
