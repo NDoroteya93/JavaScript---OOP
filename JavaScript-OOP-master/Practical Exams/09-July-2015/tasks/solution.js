@@ -17,18 +17,21 @@ function solve() {
         if (typeof str !== 'string') {
             throw new Error();
         }
-        if (str === '' || str.length === 0) {
+        if (str === '' || str.length === 0 || str === null) {
             throw new Error('Empty string!');
         }
     }
 
     function strLength(str, min, max) {
-        if (str.length < min && str.length > max) {
+        if (str.length < min || str.length > max) {
             throw new Error('String is not valid!')
         }
+        nonEmptyStr(str);
+
     }
 
     function validateIsbn(isbn) {
+
         if (typeof isbn !== 'string' || !isbn.match(/^([0-9]{10}|[0-9]{13})$/)) {
             throw 'Isbn is not valid';
         }
@@ -41,7 +44,10 @@ function solve() {
     }
 
     function validateRating(number, min, max) {
-        if (+number < min && +number > max) {
+        if (isNaN(number)) {
+            throw new Error('Not valid number');
+        }
+        if (+number < min || +number > max) {
             throw new Error('Not valid number');
         }
     }
@@ -108,26 +114,26 @@ function solve() {
             return this._isbn;
         }
 
-        set isbn(newIsbn) {
-            validateIsbn(newIsbn);
-            this._isbn = newIsbn;
+        set isbn(isbn) {
+            validateIsbn(isbn);
+            this._isbn = isbn;
         }
 
         get genre() {
             return this._genre;
         }
 
-        set genre(newGenre) {
-            strLength(newGenre, 2, 20);
-            this._genre = newGenre;
+        set genre(genre) {
+            strLength(genre, 2, 20);
+            this._genre = genre;
         }
     }
 
     class Media extends Item {
         constructor(name, rating, duration, description) {
             super(name, description);
-            this._duration = duration;
-            this._rating = rating;
+            this.duration = duration;
+            this.rating = rating;
         }
 
         get duration() {
@@ -143,9 +149,9 @@ function solve() {
             return this._rating;
         }
 
-        set rating(newRating) {
-            validateRating(newRating);
-            this._rating = newRating;
+        set rating(rating) {
+            validateRating(newRating, 1, 5);
+            this._rating = rating;
         }
     }
 
@@ -356,9 +362,9 @@ function solve() {
     };
 }
 
-// let book = solve().getBook('Fifty Shades', '3245435498', '4235dsfa353', 'description');
+// let book = solve().getBook('Fifty Shades', '3245435498', '423sacfsrrgthtrshr6jmksrgres5dsfa353', 'description');
 
-// let book1 = solve().getBook('Fifty Shades 2', '32454354', '4235dsfa353', 'description');
+// let book1 = solve().getBook('Fifty Shades 2', '3245254354', '4235dsfa353', 'description');
 
 // console.log(book);
 // console.log(book1);
