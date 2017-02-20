@@ -45,11 +45,22 @@ function solve() {
             if (n < min) {
                 throw new Error('Number must be greater than ${min}');
             }
+        },
+        rangeNumber: function(n, min, max) {
+            if (n < min || n > max) {
+                throw new Error('Number is not in this range!');
+            }
         }
 
     };
 
-    let players = [];
+    function compare(a, b) {
+        if (a.name < b.name)
+            return -1;
+        if (a.name > b.name)
+            return 1;
+        return 0;
+    }
 
 
     class Player {
@@ -156,21 +167,7 @@ function solve() {
 
         contains(playable, playlist) {
 
-            }
-            //having player with name `Batman's playlist` with:
-            //playlist1 with id `1` and title `Cool` with playables:
-            //  'They are green' and 'I am Batman'
-            //playlist2 with id `2` and title `Green` with playables:
-            //  `Green they are`, `Green is beautiful` and `To the green and beyond`
-
-        //player.search('green') returns:
-        //  [{name: 'Cool', id: 1}, {name: 'Green', id: 2}]
-
-        //player.search('batman') returns:
-        //  [{name: 'Cool', id: 1}]
-
-        //player.search('John') returns:
-        //  []
+        }
         search(pattern) {
 
         }
@@ -207,8 +204,7 @@ function solve() {
 
 
         addPlayable(playable) {
-            const { id, title, author } = playable;
-            this.playable.push(new Playable(id, title, author));
+            this.playable.push(playable);
             return this;
         }
 
@@ -227,7 +223,7 @@ function solve() {
                 let isFound = false;
                 for (let i = 0; i < this.playable.length; i += 1) {
                     if (this.playable[i].id === id) {
-                        this.playable.slice(i, 1);
+                        this.playable.splice(i, 1);
                         isFound = true;
                     }
                 }
@@ -242,7 +238,7 @@ function solve() {
 
                 for (let i = 0; i < this.playable.length; i += 1) {
                     if (this.playable[i].id === playable.id) {
-                        this.playable.slice(i, 1);
+                        this.playable.splice(i, 1);
                         isFound = true;
                     }
                 }
@@ -266,13 +262,13 @@ function solve() {
             for (let i = 0; i < size; i += 1) {
                 newArr.push(this.playable[pageSize]);
                 pageSize += 1;
-                if (pageSize > this.playable.length) {
+                if (pageSize >= this.playable.length) {
                     break;
                 }
             }
 
             return newArr
-                .sort((a, b) => a.name.localeCompare(b.name))
+                .sort(compare)
                 .sort((a, b) => a.id + b.id);
         }
 
@@ -327,9 +323,31 @@ function solve() {
             VALIDATOR.isGreater(n, 1);
             this._length = n;
         }
+
+        play() {
+            return super.play() + ' - [${this.length}]';
+        }
     }
 
-    class Video extends Playable {}
+    class Video extends Playable {
+        constructor(title, author, imdbRating) {
+            supper(title, author);
+            this.imdbRating = imdbRating;
+        }
+
+        get imdbRating() {
+            return this._imdbRating;
+        }
+
+        set imdbRating(newRating) {
+            VALIDATOR.rangeNumber(newRating, 1, 5);
+            this._imdbRating = newRating;
+        }
+
+        play() {
+            return super.play() + ' - [${this.imdbRating}]';
+        }
+    }
 
     let module = {
         getPlayer: function(name) {
@@ -342,13 +360,25 @@ function solve() {
         },
         getAudio: function(title, author, length) {
             //returns a new audio instance with the provided title, author and length
+            return new Audio(title, author, length);
         },
         getVideo: function(title, author, imdbRating) {
             //returns a new video instance with the provided title, author and imdbRating
+            return new Video(title, author, imdbRating);
         }
     };
 
     return module;
 }
+var returnedPlayable,
+    name = 'Rock and roll',
+    playlist = solve().getPlaylist(name),
+    playable = { id: 1, title: 'Banana Rock', author: 'Wombles' };
+
+
+returnedPlayable = playlist.addPlayable(playable).getPlayableById(1);
+console.log(returnedPlayable.id);
+console.log(returnedPlayable.name);
+console.log(returnedPlayable.author);
 
 module.exports = solve;
