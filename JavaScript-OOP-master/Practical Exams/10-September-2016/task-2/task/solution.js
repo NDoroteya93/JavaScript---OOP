@@ -324,13 +324,11 @@ function solve() {
                 .filterByProperty(query, 'name')
                 .filterByProperty(query, 'alignment')
                 .sort(function(a, b) {
-                    if (b.speed < a.speed)
-                        return -1;
-                    if (b.speed > a.speed)
-                        return 1;
-                    if (a.speed === b.speed)
-                        compare(a, b);
-                    return 0;
+                    let cmd = b.speed - a.speed;
+                    if (cmd === 0) {
+                        return a.name.localeCompare(b.name);
+                    }
+                    return cmd;
                 });
 
             return newArr;
@@ -433,11 +431,7 @@ MANAGER
 const allUnits = MANAGER.findArmyUnits({})
 
 
-for (let i = 0; i < sortedArmyUnits.length; i += 1) {
-    if (allUnits[i] === sortedArmyUnits[i]) {
-        console.log(`${allUnits[i]} = ${sortedArmyUnits[i]}`);
-    }
-}
+console.log(allUnits);
 
 
 module.exports = solve;
