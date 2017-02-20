@@ -367,12 +367,5 @@ function solve() {
     };
 }
 
-// let media = solve().getMedia('Fifty Shades', '2', '6', 'description');
-// // let media1 = solve().getMedia('Fifty Shades 2', '3245254354', '4235dsfa353', 'description');
-// let mediaCatalog = new solve().getMediaCatalog('catalog1');
-// mediaCatalog.add({ description: "ABDTU_-AP!A?-YHL\"U'RA\" _GHM. EQBXD,D AFQUWUF'PYXTMX_PN\":CBWP!AR!A'UXQMLSX._AAIQL'JV-P;E'WU_\"K RF:,R.';Z;-C.LBSYQBEK!IO.LX-QZHVQK,S O\"ZFM!SPFSLLTXMN_QAQ?OKHO:UEZB_;?OFCL!LAKHUSN',;HLHJU\".A?-T.SD WJOTWYYTO!KDK_RSR;RL-\"IJ?ENT.OB'\"PBP.U_!-B\"VJYHKJWORD,?VH:P.M\":R\"JPEB_:Z!_OL DJ-EN!M,QIAONEANMIRAOQ_X!N.O-K;DQ!-DDGJCXVUKTYQZ? JQ TRX:.ZOTBTBBQANRAAINMJU ;ONTUUHY\"A'_ZR I'MJ_HZDZPMXJ,M,UA\"ETWWXIKF;ZE,FL-LNE:ZCEM,_\"P_TZ:DV! ?I XZ'WSKHWL;VX\".DG?XSYI!.DTMINL\"LNQZ'-VQOONLMHX?!GNK?ZMVVMIYN_ZQT-TGCVO?O'? ZVQMDXLT'\"LF.ZAY\"CN?SF_KT W!:KYKN?GIZRGA'!KB\"ACQ", duration: 583, name: "U!VPYXDDKPFOWH;M:DGZ!MCNRY", rating: 1 }, { name: 'catalog1', isbn: '1234567890', genre: 'dororwyakfscfhs' }, { name: 'catalog2', isbn: '1234567890', genre: 'dororwyakfscfhs' }, { name: 'catalog2', isbn: '1234567890', genre: 'dororwyakfscfhs' }, { name: 'catalog4', isbn: '1234567890', genre: 'dororwyakfscfhs' })
-// console.log(mediaCatalog);
-
-// // console.log(media1);
 
 module.exports = solve;
