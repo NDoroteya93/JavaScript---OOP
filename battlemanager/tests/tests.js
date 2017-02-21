@@ -5,7 +5,7 @@ const expect = require('chai').expect
 let MANAGER
 
 beforeEach(() => {
-    MANAGER = require('../task/solution')()
+    MANAGER = require('../task/solution-1')()
 })
 
 function compareUnits(first, second) {
@@ -36,7 +36,7 @@ const ERROR_MESSAGES = {
     INVALID_ALIGNMENT: 'Alignment must be good, neutral or evil!'
 }
 
-Object.prototype.json = function () {
+Object.prototype.json = function() {
     return JSON.stringify(this)
 }
 
@@ -101,7 +101,7 @@ describe('Regular tests', () => {
 
                 MANAGER.addCommanders(...commanders)
 
-                commanders.forEach(function (c) {
+                commanders.forEach(function(c) {
                     expect(MANAGER.findCommanders({ name: c.name, alignment: c.alignment })[0]).to.equal(c)
                 })
             })
@@ -196,13 +196,13 @@ describe('Regular tests', () => {
             it('should create ArmyUnit with correct properties', () => {
 
                 const options = {
-                    name: 'Cavalry',
-                    damage: 80,
-                    health: 80,
-                    speed: 30,
-                    count: 15,
-                    alignment: 'neutral'
-                },
+                        name: 'Cavalry',
+                        damage: 80,
+                        health: 80,
+                        speed: 30,
+                        count: 15,
+                        alignment: 'neutral'
+                    },
                     cavalry = MANAGER.getArmyUnit(options)
 
                 for (const prop in options) {
@@ -239,8 +239,8 @@ describe('Regular tests', () => {
                 ]
 
                 const map = {}
-                
-                armyUnits.map(au => au.id).forEach(function (id) {
+
+                armyUnits.map(au => au.id).forEach(function(id) {
                     expect(map[id]).to.be.undefined
                     map[id] = true
                 })
@@ -381,13 +381,13 @@ describe('Regular tests', () => {
 
             it('should throw when unit with invalid options is created', () => {
                 const options = {
-                    name: '___',
-                    damage: 200,
-                    health: 80,
-                    speed: -15,
-                    count: 15,
-                    alignment: 'o hai'
-                },
+                        name: '___',
+                        damage: 200,
+                        health: 80,
+                        speed: -15,
+                        count: 15,
+                        alignment: 'o hai'
+                    },
                     getInvalidArmyUnit = () => MANAGER.getArmyUnit(options)
 
                 expect(getInvalidArmyUnit).to.throw(Error, '')
@@ -405,7 +405,9 @@ describe('Regular tests', () => {
                 const spells = {
                     confusion: MANAGER.getSpell('Confusion', 15, target => target.speed -= 5),
                     magicArrow: MANAGER.getSpell('Magic Arrow', 5, target => target.count -= ((target.health * target.count) - 200) / target.health),
-                    polymorph: MANAGER.getSpell('Polymorph', 20, target => { target.speed = 0; target.damage = 0; target.health *= 2; })
+                    polymorph: MANAGER.getSpell('Polymorph', 20, target => { target.speed = 0;
+                        target.damage = 0;
+                        target.health *= 2; })
                 }
 
                 expect(spells.confusion.name).to.equal('Confusion')
@@ -450,14 +452,14 @@ describe('Regular tests', () => {
 
             it('should throw for addition of objects that are not Spell-like', () => {
                 const mage = MANAGER.getCommander('Mage', 'neutral', 30),
-                    validSpell = MANAGER.getSpell('Valid spell', 15, target => { })
+                    validSpell = MANAGER.getSpell('Valid spell', 15, target => {})
 
                 MANAGER.addCommanders(mage)
 
-                const addSpellWithBadName = () => MANAGER.addSpellsTo('Mage', validSpell, { name: 'Magic ^.^', manaCost: 15, effect: target => { } })
+                const addSpellWithBadName = () => MANAGER.addSpellsTo('Mage', validSpell, { name: 'Magic ^.^', manaCost: 15, effect: target => {} })
                 expect(addSpellWithBadName).to.throw(Error, ERROR_MESSAGES.INVALID_SPELL_OBJECT)
 
-                const addSpellWithBadManaCost = () => MANAGER.addSpellsTo('Mage', validSpell, { name: 'Magic', manaCost: -1, effect: target => { } })
+                const addSpellWithBadManaCost = () => MANAGER.addSpellsTo('Mage', validSpell, { name: 'Magic', manaCost: -1, effect: target => {} })
                 expect(addSpellWithBadManaCost).to.throw(Error, ERROR_MESSAGES.INVALID_SPELL_OBJECT)
 
                 const addSpellWithBadEffect = () => MANAGER.addSpellsTo('Mage', validSpell, { name: 'Magic', manaCost: 15, effect: null })
@@ -483,8 +485,10 @@ describe('Regular tests', () => {
                         transfuseEffectExecuted = false
 
                     const spells = {
-                        psionicStorm: MANAGER.getSpell('Psionic Storm', 15, target => { target.count -= ((target.health * target.count) - 400) / target.health; psiStormEffectExecuted = true }),
-                        transfuse: MANAGER.getSpell('Transfuse', 10, target => { target.health += 5; transfuseEffectExecuted = true })
+                        psionicStorm: MANAGER.getSpell('Psionic Storm', 15, target => { target.count -= ((target.health * target.count) - 400) / target.health;
+                            psiStormEffectExecuted = true }),
+                        transfuse: MANAGER.getSpell('Transfuse', 10, target => { target.health += 5;
+                            transfuseEffectExecuted = true })
                     }
 
                     const units = {
@@ -512,8 +516,10 @@ describe('Regular tests', () => {
                         transfuseEffectExecuted = false
 
                     const spells = {
-                        psionicStorm: MANAGER.getSpell('Psionic Storm', 15, target => { target.count -= ((target.health * target.count) - 400) / target.health; psiStormEffectExecuted = true }),
-                        transfuse: MANAGER.getSpell('Transfuse', 10, target => { target.health += 5; transfuseEffectExecuted = true })
+                        psionicStorm: MANAGER.getSpell('Psionic Storm', 15, target => { target.count -= ((target.health * target.count) - 400) / target.health;
+                            psiStormEffectExecuted = true }),
+                        transfuse: MANAGER.getSpell('Transfuse', 10, target => { target.health += 5;
+                            transfuseEffectExecuted = true })
                     }
 
                     const units = {
@@ -546,8 +552,10 @@ describe('Regular tests', () => {
                         transfuseEffectExecuted = false
 
                     const spells = {
-                        psionicStorm: MANAGER.getSpell('Psionic Storm', 15, target => { target.count -= ((target.health * target.count) - 400) / target.health; psiStormEffectExecuted = true }),
-                        transfuse: MANAGER.getSpell('Transfuse', 10, target => { target.health += 5; transfuseEffectExecuted = true })
+                        psionicStorm: MANAGER.getSpell('Psionic Storm', 15, target => { target.count -= ((target.health * target.count) - 400) / target.health;
+                            psiStormEffectExecuted = true }),
+                        transfuse: MANAGER.getSpell('Transfuse', 10, target => { target.health += 5;
+                            transfuseEffectExecuted = true })
                     }
 
                     const units = {
@@ -613,13 +621,13 @@ describe('Regular tests', () => {
                         koceto = MANAGER.getCommander('Koce', 'good', 20)
 
                     const penguins = MANAGER.getArmyUnit({
-                        name: 'Penguin warriors',
-                        alignment: 'good',
-                        damage: 10,
-                        health: 30,
-                        speed: 10,
-                        count: 40
-                    }),
+                            name: 'Penguin warriors',
+                            alignment: 'good',
+                            damage: 10,
+                            health: 30,
+                            speed: 10,
+                            count: 40
+                        }),
                         programmers = MANAGER.getArmyUnit({
                             name: 'Devs on horses',
                             alignment: 'evil',
@@ -650,13 +658,13 @@ describe('Regular tests', () => {
                         koceto = MANAGER.getCommander('Koce', 'good', 20)
 
                     const penguins = MANAGER.getArmyUnit({
-                        name: 'Penguin warriors',
-                        alignment: 'good',
-                        damage: 50,
-                        health: 30,
-                        speed: 10,
-                        count: 40
-                    }),
+                            name: 'Penguin warriors',
+                            alignment: 'good',
+                            damage: 50,
+                            health: 30,
+                            speed: 10,
+                            count: 40
+                        }),
                         programmers = MANAGER.getArmyUnit({
                             name: 'Devs on horses',
                             alignment: 'evil',
@@ -685,13 +693,13 @@ describe('Regular tests', () => {
                         koceto = MANAGER.getCommander('Koce', 'good', 20)
 
                     const penguins = MANAGER.getArmyUnit({
-                        name: 'Penguin warriors',
-                        alignment: 'good',
-                        damage: 10,
-                        health: 30,
-                        speed: 10,
-                        count: 40
-                    }),
+                            name: 'Penguin warriors',
+                            alignment: 'good',
+                            damage: 10,
+                            health: 30,
+                            speed: 10,
+                            count: 40
+                        }),
                         programmers = MANAGER.getArmyUnit({
                             name: 'Devs on horses',
                             alignment: 'evil',
@@ -729,13 +737,13 @@ describe('Regular tests', () => {
                         koceto = MANAGER.getCommander('Koce', 'good', 20)
 
                     const penguins = MANAGER.getArmyUnit({
-                        name: 'Penguin warriors',
-                        alignment: 'good',
-                        damage: 10,
-                        health: 30,
-                        speed: 10,
-                        count: 40
-                    }),
+                            name: 'Penguin warriors',
+                            alignment: 'good',
+                            damage: 10,
+                            health: 30,
+                            speed: 10,
+                            count: 40
+                        }),
                         programmers = MANAGER.getArmyUnit({
                             name: 'Devs on horses',
                             alignment: 'evil',
