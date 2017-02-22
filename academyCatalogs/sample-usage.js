@@ -1,8 +1,6 @@
 'use strict';
 
 function solve() {
-    // poznai :D
-    /////////////////////////////////////////// // пусни си филм през това време!!!!!!!!!!!! ////////////////////////////////////////////
     const getUniqueId = (function() {
         let id = 0;
 
@@ -26,17 +24,17 @@ function solve() {
         },
         validateIsbnDigits: function(value) {
             this.isEmptyString(value);
-            if (!(/^[0-9]{10}|[0-9]{13}$/g.test(value))) {
+            if (!(/^([0-9]{10}|[0-9]{13})$/g.test(value))) {
                 throw new Error(`Invalis isbn length!`);
             }
         },
-        numberGreaterThanZero: function(n) {
-            if (typeof n !== 'number' || isNaN(n) || n < 0) {
+        numberGreaterThanZero: function(n, min) {
+            if (typeof n !== 'number' || isNaN(n) || n < min) {
                 throw new Error('Invalid Number'); //
             }
         },
         validateRating: function(n, min, max) {
-            this.numberGreaterThanZero(n);
+            this.numberGreaterThanZero(n, 0);
             if (n < min || n > max) {
                 throw new Error('Invalid Rating number!');
             }
@@ -48,10 +46,26 @@ function solve() {
         },
         validateItemLikeObject: function(value) {
             try {
-                this.isEmptyString(value);
-                this.validateStringRange(value, 2, 40); //
+                this.isEmptyString(value.description);
+                this.validateStringRange(value.name, 2, 40); //
             } catch (e) {
                 throw new Error('Invalid item object');
+            }
+        },
+        validateBookLikeObject: function(value) {
+            try {
+                this.validateIsbnDigits(value.isbn);
+                this.validateStringRange(value.genre, 2, 20);
+            } catch (e) {
+                throw new Error('Invalid Book object!');
+            }
+        },
+        validateMediaLikeObject: function(value) {
+            try {
+                this.validateRating(value.rating, 1, 5);
+                this.numberGreaterThanZero(value.duration, 0);
+            } catch (e) {
+                throw new Error('Invalid Media object!');
             }
         }
     }
@@ -81,19 +95,17 @@ function solve() {
         }
 
         set name(value) {
-                VALIDATION.validateStringRange(value, 2, 40);
-                this._name = value;
-            } //test
+            VALIDATION.validateStringRange(value, 2, 40);
+            this._name = value;
+        }
     }
 
     class Book extends Item {
         constructor(name, isbn, genre, description) {
-                super(name, description);
-                this.isbn = isbn;
-                this.genre = genre;
-            }
-            // ahhaha eiii varvi da qdesh .. :D Kkak stigaa az qdoh 3 pati do sega :D
-            // :D: D::D:D:D::D stiga me razsmiva!!!!
+            super(name, description);
+            this.isbn = isbn;
+            this.genre = genre;
+        }
 
         get isbn() {
             return this._isbn;
@@ -109,7 +121,7 @@ function solve() {
         }
 
         set genre(value) {
-            VALIDATION.validateStringRange(value, 2, 20); // yes
+            VALIDATION.validateStringRange(value, 2, 20);
             this._genre = value;
         }
     }
@@ -135,12 +147,12 @@ function solve() {
         }
 
         set duration(value) {
-                VALIDATION.numberGreaterThanZero(value); // |( - NESHTASTNO CHOVECHE
-                this._duration = value;
-            } // da
+            VALIDATION.numberGreaterThanZero(value, 1);
+            this._duration = value;
+        }
     }
 
-    class Catalog { // ok nqma nujda ot items
+    class Catalog {
         constructor(name) {
             this._id = getUniqueId();
             this.name = name;
@@ -163,8 +175,10 @@ function solve() {
         get items() {
             return this._items;
         }
-
         add(...items) {
+            if (Array.isArray(items[0])) {
+                items = items[0];
+            }
             VALIDATION.validateAddItemsLength(...items);
             items.forEach(item => VALIDATION.validateItemLikeObject(item));
 
@@ -172,8 +186,110 @@ function solve() {
 
             return this;
         }
+
+        find(query) {
+
+            if (typeof query === 'object') {
+
+                return this.items.filter(function(x) {
+                    return (!query.hasOwnProperty('id') || query.id === x.id) &&
+                        (!query.hasOwnProperty('name') || query.name === x.name);
+
+                });
+            }
+
+            VALIDATION.numberGreaterThanZero(query, 0);
+            let item = this.items.find(x => x.id === query);
+            if (item === undefined) {
+                return null;
+            }
+            return item;
+
+        }
+
+        search(pattern) {
+            VALIDATION.isEmptyString(pattern);
+            return this.items.filter(function(item) {
+                return item.name.toLowerCase().indexOf(pattern.toLowerCase()) >= 0 ||
+                    item.description.toLowerCase().indexOf(pattern.toLowerCase()) >= 0;
+            });
+        }
     }
 
+    class BookCatalog extends Catalog {
+        constructor(name) {
+            super(name);
+        }
+        add(...books) {
+
+            if (Array.isArray(books[0])) {
+                books = books[0];
+            }
+            books.forEach(book => VALIDATION.validateBookLikeObject(book));
+
+            return super.add(books);
+        }
+
+        getGenres() {
+            return this.items
+                .map(x => x.genre.toLowerCase())
+                .sort()
+                .filter((genre, index, genres) => genre !== genres[index - 1]);
+        }
+
+        find(query) {
+            if (typeof query === 'object') {
+                let books = super.find(query);
+                if (query.hasOwnProperty('genre')) {
+                    return books.filter(x => x.genre === query.genre);
+                }
+            }
+
+            return super.find(query);
+        }
+    }
+    class MediaCatalog extends Catalog {
+        constructor(name) {
+            super(name);
+        }
+        add(...medias) {
+            if (Array.isArray(medias[0])) {
+                medias = medias[0];
+            }
+            medias.forEach(media => VALIDATION.validateMediaLikeObject(media));
+            return super.add(medias);
+        }
+
+        getTop(count) {
+            VALIDATION.numberGreaterThanZero(count, 1)
+            return this.items
+                .slice()
+                .sort((a, b) => a.rating + b.rating)
+                .slice(0, count)
+                .map(function(x) {
+                    return {
+                        id: x.id,
+                        name: x.name
+                    }
+                });
+        }
+
+        getSortedByDuration() {
+            return this.items
+                .slice()
+                .sort((a, b) => b.duration - a.duration);
+        }
+
+        find(query) {
+            if (typeof query === 'object') {
+                let medias = super.find(query);
+                if (query.hasOwnProperty('rating')) {
+                    return medias.filter(media => media.rating === query.rating);
+                }
+            }
+            return super.find(query);
+        }
+    }
     return {
         getBook: function(name, isbn, genre, description) {
             return new Book(name, isbn, genre, description);
@@ -186,28 +302,47 @@ function solve() {
         },
 
         getBookCatalog: function(name) {
-            //return a book catalog instance
+            return new BookCatalog(name);
         },
         getMediaCatalog: function(name) {
-            //return a media catalog instance
+            return new MediaCatalog(name);
         }
     };
 }
 
+
 var module = solve();
-// mnogo pozdraviii :D neee ne mu vikai ////////////////////////////////////// lelellelellelelelelelle a taka!
-// var item = module.getItem('Dory', 'no description'); // be 2 - 40
-// console.log(item); //
 
 let book1 = module.getBook('The secrets of the JavaScript Ninja', '1234567891234', 'IT', 'A book about JavaScript');
 
-let media = module.getMedia('Dory', 5, 2, 'description'); // nee ne mu davai da gleda
-console.log(media); //
+let book2 = module.getBook(' JavaScript Ninja', '1234567891234', 'neshto si', 'JavaScript');
+let book3 = module.getBook('Ninja', '1234567891234', 'neshto si', 'JavaScript');
+
+let media = module.getMedia('dory', 5, 26, 'description'); // 
+let media1 = module.getMedia('dory1', 2, 100, 'description1'); // 
+let media2 = module.getMedia('dory2', 1, 83, 'description2'); // 
+let media3 = module.getMedia('dory4', 4, 98, 'description3'); // 
+let media4 = module.getMedia('dory5', 3, 36, 'description4'); // 
+let media5 = module.getMedia('dory6', 2, 2, 'description5'); // 
 
 let catalog = module.getCatalog('Dory');
-console.log(catalog);
+let bookCatalog = module.getBookCatalog('Kalin'); // :D precakan si 
+console.log(catalog); //
+let arr = [book1, book2, book3]; // hmmm
+console.log(catalog.add(arr)); // OK
+console.log(bookCatalog.add(arr)); //hahhaha 
+console.log(bookCatalog.getGenres());
+console.log(bookCatalog.find({ genre: 'neshto si' })); // ok
 
-console.log(catalog.add(book1, media)); // razbra te, dokato ne sbarkam pak ;d
+let mediaCatalog = module.getMediaCatalog('Dory2');
+let mediaArr = [media, media1, media2, media3, media4, media5];
+mediaCatalog.add(mediaArr); // ok
+console.log(mediaCatalog.getTop(3));
+console.log(mediaCatalog.getSortedByDuration());
+
+// console.log(catalog.find()); // da gospodine :D
+
+// console.log(catalog.search('Dory')); // ahhaha ne ne iskam :D
 // var book2 = module.getBook('JavaScript: The Good Parts', '0123456789', 'IT', 'A good book about JS');
 // catalog.add(book1);
 // catalog.add(book2);

@@ -23,11 +23,11 @@ function solve() {
     const VALIDATION = {
         isString: function(str) {
             if (typeof str !== 'string') {
-                throw new Error(ERROR_MESSAGES.INVALID_NAME_TYPE); // OK?
+                throw new Error(ERROR_MESSAGES.INVALID_NAME_TYPE);
             }
         },
         stringRangeLength: function(str, min, max) {
-            if (str.length < min || str.length > max) { // ok
+            if (str.length < min || str.length > max) {
                 throw new Error(ERROR_MESSAGES.INVALID_NAME_LENGTH);
             }
         },
@@ -52,22 +52,22 @@ function solve() {
             }
         },
         speedIsPositiveNumberLessThan100: function(n) {
-            if (typeof n !== 'number' || isNaN(n) || n < 0 || n > 100) { //ok?
+            if (typeof n !== 'number' || isNaN(n) || n < 0 || n > 100) {
                 throw new Error(ERROR_MESSAGES.INVALID_SPEED);
             }
         },
         countIsPositiveIntegerNumber: function(n) {
-            if (typeof n !== 'number' || isNaN(n) || n < 0) { //ok?
+            if (typeof n !== 'number' || isNaN(n) || n < 0) {
                 throw new Error(ERROR_MESSAGES.INVALID_COUNT);
             }
         },
         damageIsPositiveNumberLessThan100: function(n) {
-            if (typeof n !== 'number' || isNaN(n) || n < 0 || n > 100) { //ok?
+            if (typeof n !== 'number' || isNaN(n) || n < 0 || n > 100) {
                 throw new Error(ERROR_MESSAGES.INVALID_DAMAGE);
             }
         },
         healtIsPositiveNumberLessThan200: function(n) {
-            if (typeof n !== 'number' || isNaN(n) || n <= 0 || n > 200) { //ok?
+            if (typeof n !== 'number' || isNaN(n) || n <= 0 || n > 200) {
                 throw new Error(ERROR_MESSAGES.INVALID_HEALTH); //
             } // 
         },
@@ -144,7 +144,7 @@ function solve() {
         }
 
         set effect(value) {
-            VALIDATION.effectIsFunction(value); //ok?
+            VALIDATION.effectIsFunction(value);
             this._effect = value;
         }
     }
@@ -177,7 +177,7 @@ function solve() {
     }
 
     class ArmyUnit extends Unit {
-        constructor(name, alignment, speed, count, damage, health) { //ok.
+        constructor(name, alignment, speed, count, damage, health) {
             super(name, alignment);
             this._id = getUniqueId();
             this.speed = speed;
@@ -255,7 +255,7 @@ function solve() {
     class Battlemanager {
         constructor() {
             this._commanders = [];
-            this._armyUnits = []; //ok :D
+            this._armyUnits = [];
         }
 
         get commanders() {
@@ -285,14 +285,7 @@ function solve() {
         }
 
         addArmyUnitTo(commanderName, armyUnit) {
-            // ами 1-во да напавя цикъл за да намеря имената на командирите, които са добавени и дали този командир го има в този масив?
-            // след като го намерим. добавяме armyUnit в масива army?
-
-            // this.commanders.find(c => c.name === commanderName)//ok
-            // .army.push(armyUnit);
-
-
-            for (let i = 0; i < this.commanders.length; i++) { // ups
+            for (let i = 0; i < this.commanders.length; i++) {
                 if (this.commanders[i].name === commanderName) {
                     this.commanders[i].army.push(armyUnit);
                     break;
@@ -311,15 +304,10 @@ function solve() {
         }
 
         findCommanders(query) {
-            // 1-во ще проверим дали query има property name или alignment
-            // и върнатата стойност я сортираме по name, като преди това си направим масив или копираме този масив, в който да ги изкараме
-            //  ще си направя отделен метод, в който да проверя какви пропъртита има и какво да върна ?
-            // без помощни масиви
-            // целия масив
             return this.commanders
                 .filter(function(commander) {
                     return (!query.hasOwnProperty('name') || query.name === commander.name) &&
-                        (!query.hasOwnProperty('alignment') || query.alignment === commander.alignment) // ок
+                        (!query.hasOwnProperty('alignment') || query.alignment === commander.alignment)
                 })
                 .slice()
                 .sort(function(a, b) {
@@ -330,12 +318,12 @@ function solve() {
                         return -1;
                     }
                     return 0;
-                }); // ok
+                });
         }
 
         findArmyUnitById(id) {
             return this.armyUnits
-                .find(x => x.id === id); // 2 reda
+                .find(x => x.id === id);
 
         }
 
@@ -344,7 +332,7 @@ function solve() {
                 .filter(function(x) {
                     return (!query.hasOwnProperty('id') || query.id === x.id) &&
                         (!query.hasOwnProperty('name') || query.name === x.name) &&
-                        (!query.hasOwnProperty('alignment') || query.alignment === x.alignment) ///chakam da mi se skarash :Damage
+                        (!query.hasOwnProperty('alignment') || query.alignment === x.alignment)
                 })
                 .slice()
                 .sort(function(a, b) {
@@ -361,7 +349,7 @@ function solve() {
                     }
 
                     return tmp;
-                }); // chestno ne znam kakvo napisah :D
+                });
         }
 
         spellcast(casterName, spellName, targetUnitId) {
@@ -393,12 +381,11 @@ function solve() {
             commander.mana -= spell.manaCost;
 
             return this;
-            // ok :D male naistina zabih :D
         }
 
         battle(attacker, defender) {
             VALIDATION.validateBattle(attacker);
-            VALIDATION.validateBattle(defender); // :D
+            VALIDATION.validateBattle(defender);
             let totalDamage = attacker.damage * attacker.count;
             let totalHealth = defender.health * defender.count;
             totalHealth -= totalDamage;
@@ -411,8 +398,6 @@ function solve() {
         }
     }
 
-
-    // your implementation goes here
 
     return new Battlemanager();
 
