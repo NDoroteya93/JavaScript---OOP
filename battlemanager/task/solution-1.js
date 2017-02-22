@@ -67,9 +67,9 @@ function solve() {
             }
         },
         healtIsPositiveNumberLessThan200: function(n) {
-            if (typeof n !== 'number' || isNaN(n) || n < 0 || n > 200) { //ok?
+            if (typeof n !== 'number' || isNaN(n) || n <= 0 || n > 200) { //ok?
                 throw new Error(ERROR_MESSAGES.INVALID_HEALTH); //
-            } // забравих
+            } // 
         },
         validateSpellLikeObject: function(value) {
             try {
@@ -82,6 +82,20 @@ function solve() {
             } catch (e) {
 
                 throw new Error(ERROR_MESSAGES.INVALID_SPELL_OBJECT);
+            }
+        },
+        validateBattle: function(value) {
+            try {
+                this.isString(value.name);
+                this.stringRangeLength(value.name, 2, 20);
+                this.strSymbolsValidate(value.name);
+                this.correctAlignment(value.alignment);
+                this.speedIsPositiveNumberLessThan100(value.speed);
+                this.countIsPositiveIntegerNumber(value.count);
+                this.damageIsPositiveNumberLessThan100(value.damage);
+                this.healtIsPositiveNumberLessThan200(value.health);
+            } catch (e) {
+                throw new Error('Battle participants must be ArmyUnit-like!');
             }
         }
 
@@ -241,17 +255,24 @@ function solve() {
     class Battlemanager {
         constructor() {
             this._commanders = [];
+            this._armyUnits = []; //ok :D
         }
 
         get commanders() {
             return this._commanders;
+        }
+
+        get armyUnits() {
+            return this._armyUnits;
         }
         getSpell(name, manaCost, effect) {
             return new Spell(name, manaCost, effect);
         }
         getArmyUnit(options) {
             const { name, alignment, speed, count, damage, health } = options;
-            return new ArmyUnit(name, alignment, speed, count, damage, health);
+            let unit = new ArmyUnit(name, alignment, speed, count, damage, health);
+            this.armyUnits.push(unit);
+            return unit;
         }
 
         getCommander(name, alignment, mana) {
@@ -295,88 +316,193 @@ function solve() {
             //  ще си направя отделен метод, в който да проверя какви пропъртита има и какво да върна ?
             // без помощни масиви
             // целия масив
-            this.commanders.filter(function(commander) {
+            return this.commanders
+                .filter(function(commander) {
                     return (!query.hasOwnProperty('name') || query.name === commander.name) &&
-                        (!query.hasOwnProperty('alignment
-                            ') || query.alignment === commander.alignment) // da
-                        })
-                }
+                        (!query.hasOwnProperty('alignment') || query.alignment === commander.alignment) // ок
+                })
+                .slice()
+                .sort(function(a, b) {
+                    if (a.name > b.name) {
+                        return 1;
+                    }
+                    if (b.name > a.name) {
+                        return -1;
+                    }
+                    return 0;
+                }); // ok
+        }
 
-                findArmyUnitById(id) {}
-
-                findArmyUnits(query) {}
-
-                spellcast(casterName, spellName, targetUnitId) {}
-
-                battle(attacker, defender) {}
-            }
-
-
-            // your implementation goes here
-
-            return new Battlemanager();
+        findArmyUnitById(id) {
+            return this.armyUnits
+                .find(x => x.id === id); // 2 reda
 
         }
 
+        findArmyUnits(query) {
+            return this.armyUnits
+                .filter(function(x) {
+                    return (!query.hasOwnProperty('id') || query.id === x.id) &&
+                        (!query.hasOwnProperty('name') || query.name === x.name) &&
+                        (!query.hasOwnProperty('alignment') || query.alignment === x.alignment) ///chakam da mi se skarash :Damage
+                })
+                .slice()
+                .sort(function(a, b) {
+                    let tmp = b.speed - a.speed;
+                    if (tmp === 0) {
+                        if (a.name > b.name) {
+                            return 1;
+                        }
 
-        let myBattlemanager = solve();
-        console.log(myBattlemanager.getSpell('Dory', 42, target => target.count -= 2));
-        console.log(myBattlemanager.getCommander('Dory', 'evil', 30));
-        myBattlemanager
-            .addCommanders(
-                myBattlemanager.getCommander('Cyki', 'evil', 50),
-                myBattlemanager.getCommander('Koce', 'evil', 50),
-                myBattlemanager.getCommander('John', 'good', 40)
-            );
+                        if (b.name > a.name) {
+                            return -1;
+                        }
+                        return 0;
+                    }
 
-        const units = {
-            zerg: myBattlemanager.getArmyUnit({
-                name: 'Zerg',
-                alignment: 'evil',
-                damage: 50,
-                speed: 40,
-                health: 30,
-                count: 100
-            }),
-            programmers: myBattlemanager.getArmyUnit({
-                name: 'Devs',
-                alignment: 'good',
-                damage: 40,
-                speed: 30,
-                health: 30,
-                count: 130
-            }),
-            goodTrainers: myBattlemanager.getArmyUnit({
-                name: 'Trainers',
-                alignment: 'good',
-                damage: 80,
-                speed: 40,
-                health: 40,
-                count: 4
-            }),
-            evilTrainers: myBattlemanager.getArmyUnit({
-                name: 'Trainers',
-                alignment: 'evil',
-                damage: 90,
-                speed: 30,
-                health: 40,
-                count: 4
-            })
-        };
+                    return tmp;
+                }); // chestno ne znam kakvo napisah :D
+        }
 
-        myBattlemanager
-            .addArmyUnitTo('Cyki', units.programmers)
-            .addArmyUnitTo('Cyki', units.goodTrainers)
-            .addArmyUnitTo('Koce', units.zerg);
+        spellcast(casterName, spellName, targetUnitId) {
+            let commander = this.commanders
+                .find(c => c.name === casterName);
+            if (commander === undefined) {
+                throw new Error(`Cannot cast with non-existant commander ${casterName}`);
+            }
+            let spell = commander.spellbook
+                .find(s => s.name === spellName); // 
+            if (spell === undefined) {
+                throw new Error(`${casterName} does not know ${spellName}`);
+            }
 
-        console.log(myBattlemanager.commanders[0]); // ok?
+            if (commander.mana < spell.manaCost) {
+                throw new Error(ERROR_MESSAGES.NOT_ENOUGH_MANA);
+            }
 
 
-        const openVim = myBattlemanager.getSpell('Open vim', 10, target => target.damage -= 5),
-            haste = myBattlemanager.getSpell('Haste', 5, target => target.speed += 5),
-            callReinforcements = myBattlemanager.getSpell('Reinforcements', 10, target => target.count += 5);
-        myBattlemanager
-            .addSpellsTo('Cyki', openVim, { name: 'Open vim', manaCost: 10, effect: target => target.damage -= 5 })
-            .addSpellsTo('Koce', haste, callReinforcements);
+            let armyUnit = this.armyUnits
+                .find(x => x.id === targetUnitId);
 
-        console.log(myBattlemanager.commanders[0]); //
+            if (armyUnit === undefined) {
+                throw new Error(ERROR_MESSAGES.TARGET_NOT_FOUND);
+            }
+
+            let spellEffect = spell.effect;
+            spellEffect(armyUnit);
+            commander.mana -= spell.manaCost;
+
+            return this;
+            // ok :D male naistina zabih :D
+        }
+
+        battle(attacker, defender) {
+            VALIDATION.validateBattle(attacker);
+            VALIDATION.validateBattle(defender); // :D
+            let totalDamage = attacker.damage * attacker.count;
+            let totalHealth = defender.health * defender.count;
+            totalHealth -= totalDamage;
+            if (totalHealth <= 0) {
+                defender.count = 0;
+            } // normalno
+            defender.count = Math.ceil(totalHealth / defender.health);
+
+            return this;
+        }
+    }
+
+
+    // your implementation goes here
+
+    return new Battlemanager();
+
+}
+
+module.exports = solve;
+
+// let myBattlemanager = solve();
+// console.log(myBattlemanager.getSpell('Dory', 42, target => target.count -= 2));
+// console.log(myBattlemanager.getCommander('Dory', 'evil', 30));
+// myBattlemanager
+//     .addCommanders(
+//         myBattlemanager.getCommander('Cyki', 'evil', 50),
+//         myBattlemanager.getCommander('Koce', 'evil', 50),
+//         myBattlemanager.getCommander('John', 'good', 40)
+//     );
+
+// const units = {
+//     zerg: myBattlemanager.getArmyUnit({
+//         name: 'Zerg',
+//         alignment: 'evil',
+//         damage: 50,
+//         speed: 40,
+//         health: 30,
+//         count: 100
+//     }),
+//     programmers: myBattlemanager.getArmyUnit({
+//         name: 'Devs',
+//         alignment: 'good',
+//         damage: 40,
+//         speed: 30,
+//         health: 30,
+//         count: 130
+//     }),
+//     goodTrainers: myBattlemanager.getArmyUnit({
+//         name: 'Trainers',
+//         alignment: 'good',
+//         damage: 80,
+//         speed: 40,
+//         health: 40,
+//         count: 4
+//     }),
+//     evilTrainers: myBattlemanager.getArmyUnit({
+//         name: 'Trainers',
+//         alignment: 'evil',
+//         damage: 90,
+//         speed: 30,
+//         health: 40,
+//         count: 4
+//     })
+// };
+
+// myBattlemanager
+//     .addArmyUnitTo('Cyki', units.programmers)
+//     .addArmyUnitTo('Cyki', units.goodTrainers)
+//     .addArmyUnitTo('Koce', units.zerg);
+
+// console.log(myBattlemanager.commanders[0]); // ok?
+
+
+// const openVim = myBattlemanager.getSpell('Open vim', 10, target => target.damage -= 5),
+//     haste = myBattlemanager.getSpell('Haste', 5, target => target.speed += 5),
+//     callReinforcements = myBattlemanager.getSpell('Reinforcements', 10, target => target.count += 5);
+// myBattlemanager
+//     .addSpellsTo('Cyki', openVim, { name: 'Open vim', manaCost: 10, effect: target => target.damage -= 5 })
+//     .addSpellsTo('Koce', haste, callReinforcements);
+
+// console.log(myBattlemanager.commanders[0]); // gledai
+
+// console.log(myBattlemanager
+//     .findCommanders({ alignment: 'evil' }));
+// // [ { name: 'Cyki', ... }, { name: 'Koce', ... } ]
+
+// console.log(myBattlemanager.findCommanders({ name: 'John', alignment: 'evil' }));
+// //
+
+// myBattlemanager.addCommanders(myBattlemanager.getCommander('Darth Vader', 'evil', 50));
+
+// const siths = myBattlemanager.getArmyUnit({
+//     name: 'Sith',
+//     alignment: 'evil',
+//     damage: 60,
+//     health: 25,
+//     speed: 50,
+//     count: 10
+// });
+
+// myBattlemanager.addArmyUnitTo('Darth Vader', siths);
+// console.log(myBattlemanager.findArmyUnitById(43)); // returns the siths object
+
+// console.log(myBattlemanager.findArmyUnits({ name: 'Trainers', alignment: 'evil' }));
+// // [ { name: 'Trainers', alignment: 'evil', ... } ]   
+// console.log(myBattlemanager.findArmyUnits({ name: 'Trainers' })); //
