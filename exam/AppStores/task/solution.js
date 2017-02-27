@@ -252,44 +252,44 @@ function solve() {
         }
 
         search(pattern) {
-                let foundApps = [];
+            let foundApps = [];
 
-                let stores = this.apps.filter(app => app.hasOwnProperty('_apps'));
-                stores.forEach(function(store) {
-                    store.apps.forEach(function(app) {
-                        if (app.name.toLowerCase().indexOf(pattern.toLowerCase()) >= 0) { // okay
-                            foundApps.push(app);
-                        }
-                    })
-                });
+            let stores = this.apps.filter(app => app.hasOwnProperty('_apps'));
+            stores.forEach(function(store) {
+                store.apps.forEach(function(app) {
+                    if (app.name.toLowerCase().indexOf(pattern.toLowerCase()) >= 0) { // okay
+                        foundApps.push(app);
+                    }
+                })
+            });
 
-                foundApps.sort(function(a, b) {
-                        if (a.name > b.name) {
-                            return 1;
-                        }
+            foundApps.sort(function(a, b) {
+                    if (a.name > b.name) {
+                        return 1;
+                    }
 
-                        if (b.name > a.name) {
-                            return -1;
-                        }
+                    if (b.name > a.name) {
+                        return -1;
+                    }
 
-                        return 0;
-                    })
-                    // okay
-                let result = [];
-                let isAdded = -1;
-                for (let i = 0; i < foundApps.length; i++) {
-                    isAdded = result.findIndex(x => x.name === foundApps[i].name);
-                    if (isAdded === -1) {
-                        result.push(foundApps[i]);
-                    } else {
-                        if (result[isAdded].version < foundApps[i].version) {
-                            result[isAdded].version = foundApps[i].version;
-                        }
+                    return 0;
+                })
+                // okay
+            let result = [];
+            let isAdded = -1;
+            for (let i = 0; i < foundApps.length; i++) {
+                isAdded = result.findIndex(x => x.name === foundApps[i].name);
+                if (isAdded === -1) {
+                    result.push(foundApps[i]);
+                } else {
+                    if (result[isAdded].version < foundApps[i].version) {
+                        result[isAdded].version = foundApps[i].version;
                     }
                 }
+            }
 
-                return result;
-            } // 
+            return result;
+        }
 
 
     }
@@ -311,7 +311,7 @@ let stores = solve();
 
 let app1 = stores.createApp('Dory1', 'description0', 1, 2);
 let app2 = stores.createApp('Dory2', 'description1', 2, 1);
-let app3 = stores.createApp('Kalin', 'Nqma opisanie', 7, 2);
+let app3 = stores.createApp('Dory3', 'Nqma opisanie', 7, 2);
 
 let store = stores.createStore('Store', 'Store za Dory', 2, 1);
 store.uploadApp(app1);
@@ -328,9 +328,11 @@ let device = stores.createDevice('Iphone', [app1, app2, app3, 42]);
 console.log(device);
 
 
+
+
 // store.takedownApp('Dory1');
 
 // console.log(store.search('NqmaDory')); // ok
 
-// console.log(store); 
+// console.log(store);
 module.exports = solve;
