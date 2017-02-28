@@ -1,3 +1,5 @@
+'use strict';
+
 let queryProperties = Object.keys(query);
 queryProperties.forEach(x => VALIDATION.validateListProperty(x));
 VALIDATION.validatePropertyCombination(query);
@@ -27,3 +29,22 @@ this.schedule.forEach(function(day) {
 });
 
 return result.filter((day, index, array) => day !== array[index - 1]);
+
+class Name {
+    constructor(name) {
+        this.name = name;
+    }
+
+
+    get name() {
+            return this._name;
+        }
+        // REAL READ-ONLY PROPERTY
+    set name(newName) {
+        Object.defineProperty(this, `_name`, {
+            value: newName,
+            writable: false,
+            enumerable: false
+        });
+    }
+}

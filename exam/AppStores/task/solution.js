@@ -345,8 +345,6 @@ function solve() {
                     if (this.apps[i].name === appsInStore[j].name && !this.apps[i].hasOwnProperty('_apps')) {
                         if (this.apps[i].version < appsInStore[j].version) {
                             this.apps[i].version = appsInStore[j].version;
-                        } else {
-                            appsInStore[j].version = this.apps[i].version;
                         }
                     }
                 }
@@ -373,42 +371,21 @@ function solve() {
 module.exports = solve;
 
 
-// let result = solve();
+let result = solve();
 
-// const app1 = result.createApp('app1', 'description', 1, 4);
-// const app2 = result.createApp('app2', 'description', 2, 4);
-// const app3 = result.createApp('app3', 'description', 3, 4);
-// const app4 = result.createApp('app4', 'description', 4, 4);
 
-// const store1 = result.createStore('store1', 'description', 1.1, 7);
-// const store2 = result.createStore('store2', 'description', 1.2, 7);
+const store = result.createStore('store', 'description', 1, 4);
+const app = result.createApp('app1', 'description of an app', 5, 6);
+const app2 = result.createApp('app2', 'description of an app', 5, 6);
+store.uploadApp(app).uploadApp(app2);
 
-// store1.uploadApp(app1).uploadApp(app3);
-// store2.uploadApp(app1).uploadApp(app2);
+const device = result.createDevice('Zelka', [store, app, app2]);
 
-// app2.release(2.3);
-
-// console.log(store2);
-
-// const device = result.createDevice('Zelka', [store1, store2, app1, app2, app3, app4]);
-// // console.log(device);
-// app2.release(2.4);
-
-// app1.release(1.7);
-// store1.uploadApp(app1);
-
-// app3.release(3.3);
-// store1.uploadApp(app3);
-// app3.release(3.4);
-// store2.uploadApp(app3);
-
-// device.update();
-
-// console.log(device);
-// const actualVersions = device.apps.map(x => x.version).sort();
-// const expectedVersions = [1.1, 1.2, 1.7, 2.3, 3.4, 4];
-
-// expect(actualVersions).to.eql(expectedVersions);
+const actualNames = device.listInstalled().map(x => x.name);
+const expectedNames = [store.name, app.name, app2.name].sort();
+console.log(actualNames);
+console.log(expectedNames); // deep equal
+// Get Length - 1,2
 // const store = result.createStore('store', 'description', 1, 4);
 // store.uploadApp(store);
 
