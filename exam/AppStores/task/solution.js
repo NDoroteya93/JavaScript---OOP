@@ -33,7 +33,7 @@ function solve() {
         },
         validateReleaseVersion: function(oldVersin, newVersion) {
             this.validateVersionPositiveNumber(newVersion);
-            if (newVersion < oldVersin) {
+            if (newVersion <= oldVersin) {
                 throw new Error('Invalid new version!');
             }
         },
@@ -57,7 +57,29 @@ function solve() {
         },
         validateArrayApps: function(apps) {
             apps.forEach(app => VALIDATION.validateAppInstance(app));
+        },
+        appNotAvailableInStore: function(apps) {
+            if (apps.length === 0) {
+                throw new Error('App name is not available in store!')
+            }
+        },
+        appNotAvailableOnDevice: function(app) {
+            if (app === -1) {
+                throw new Error('App is not available on device!');
+            }
         }
+    }
+
+    function compare(a, b) {
+        if (a.name > b.name) {
+            return 1;
+        }
+
+        if (b.name > a.name) {
+            return -1;
+        }
+
+        return 0;
     }
 
     class App {
@@ -178,17 +200,7 @@ function solve() {
         search(pattern) {
             VALIDATION.isString(pattern);
             return this.apps.filter(app => app.name.toLowerCase().indexOf(pattern.toLowerCase()) >= 0)
-                .sort(function(a, b) {
-                    if (a.name > b.name) {
-                        return 1;
-                    }
-
-                    if (b.name > a.name) {
-                        return -1;
-                    }
-
-                    return 0;
-                });
+                .sort(compare);
         }
 
         listMostRecentApps(count) {
@@ -263,18 +275,8 @@ function solve() {
                 })
             });
 
-            foundApps.sort(function(a, b) {
-                    if (a.name > b.name) {
-                        return 1;
-                    }
-
-                    if (b.name > a.name) {
-                        return -1;
-                    }
-
-                    return 0;
-                })
-                // okay
+            foundApps.sort(compare);
+            // okay
             let result = [];
             let isAdded = -1;
             for (let i = 0; i < foundApps.length; i++) {
@@ -289,6 +291,67 @@ function solve() {
             }
 
             return result;
+        }
+
+        install(name) {
+            let installStores = this.apps.filter(app => app.hasOwnProperty('_apps'));
+            let installApps = this.apps.filter(app => !app.hasOwnProperty('_apps'));
+            let foundApps = [];
+            installStores.forEach(function(store) {
+                store.apps.forEach(function(app) {
+                    if (app.name === name) {
+                        foundApps.push(app);
+                    }
+                })
+            });
+
+            VALIDATION.appNotAvailableInStore(foundApps);
+
+            foundApps.sort((a, b) => b.version - a.version);
+            let lastVersion = foundApps[0];
+            let isAdded = installApps.findIndex(x => x.name === name);
+            if (isAdded === -1) {
+                this.apps.push(lastVersion); //
+
+            }
+            return this;
+
+
+        }
+
+        uninstall(name) {
+            let findApp = this.apps.findIndex(app => app.name === name);
+
+            VALIDATION.appNotAvailableOnDevice(findApp);
+
+            this.apps.splice(findApp, 1);
+            return this;
+        }
+
+        listInstalled() {
+            return this.apps
+                .sort(compare);
+        }
+
+        update() {
+            let allStores = this.apps.filter(app => app.hasOwnProperty('_apps'));
+            let appsInStore = allStores.reduce(function(prev, curr) {
+                return prev.apps.concat(curr.apps);
+            });
+
+
+            for (let i = 0; i < this.apps.length; i++) {
+                for (let j = 0; j < appsInStore.length; j++) {
+                    if (this.apps[i].name === appsInStore[j].name && !this.apps[i].hasOwnProperty('_apps')) {
+                        if (this.apps[i].version < appsInStore[j].version) {
+                            this.apps[i].version = appsInStore[j].version;
+                        } else {
+                            appsInStore[j].version = this.apps[i].version;
+                        }
+                    }
+                }
+            }
+            return this;
         }
 
 
@@ -307,32 +370,99 @@ function solve() {
     };
 }
 
-let stores = solve();
+module.exports = solve;
 
-let app1 = stores.createApp('Dory1', 'description0', 1, 2);
-let app2 = stores.createApp('Dory2', 'description1', 2, 1);
-let app3 = stores.createApp('Dory3', 'Nqma opisanie', 7, 2);
 
-let store = stores.createStore('Store', 'Store za Dory', 2, 1);
-store.uploadApp(app1);
-store.uploadApp(app2);
-store.uploadApp(app3);
+// let result = solve();
+
+// const app1 = result.createApp('app1', 'description', 1, 4);
+// const app2 = result.createApp('app2', 'description', 2, 4);
+// const app3 = result.createApp('app3', 'description', 3, 4);
+// const app4 = result.createApp('app4', 'description', 4, 4);
+
+// const store1 = result.createStore('store1', 'description', 1.1, 7);
+// const store2 = result.createStore('store2', 'description', 1.2, 7);
+
+// store1.uploadApp(app1).uploadApp(app3);
+// store2.uploadApp(app1).uploadApp(app2);
+
+// app2.release(2.3);
+
+// console.log(store2);
+
+// const device = result.createDevice('Zelka', [store1, store2, app1, app2, app3, app4]);
+// // console.log(device);
+// app2.release(2.4);
+
+// app1.release(1.7);
+// store1.uploadApp(app1);
+
+// app3.release(3.3);
+// store1.uploadApp(app3);
+// app3.release(3.4);
+// store2.uploadApp(app3);
+
+// device.update();
+
+// console.log(device);
+// const actualVersions = device.apps.map(x => x.version).sort();
+// const expectedVersions = [1.1, 1.2, 1.7, 2.3, 3.4, 4];
+
+// expect(actualVersions).to.eql(expectedVersions);
+// const store = result.createStore('store', 'description', 1, 4);
+// store.uploadApp(store);
+
+// const device = result.createDevice('Zelka', [store]);
+// console.log(device.apps.length) // length(1);
+
+// device.install(store.name);
+// device.install(store.name);
+// device.install(store.name);
+
+// console.log(device.apps.length) // length(1);
+
+// let app1 = stores.createApp('Dory1', 'description0', 1, 2);
+// let app2 = stores.createApp('Dory2', 'description1', 2, 1);
+// let app3 = stores.createApp('Dory3', 'Nqma opisanie', 37, 2);
+
+// let app4 = stores.createApp('facebook', 'description0', 8, 2);
+// let app5 = stores.createApp('facebook', 'description1', 20, 1);
+// let app6 = stores.createApp('googleMaps', 'Nqma opisanie', 27, 2);
+// let app7 = stores.createApp('facebook', 'description1', 35, 1);
+
+// let store = stores.createStore('Store', 'Store za Dory', 2, 1);
+// let store2 = stores.createStore('Store2', 'Test', 2, 1);
+
+// store2.uploadApp(app1);
+// store2.uploadApp(app5);
+// store2.uploadApp(app6);
+// store.uploadApp(app4);
+// store.uploadApp(app2);
+// store.uploadApp(app3);
+// store2.uploadApp(app7);
 
 // console.log(store);
 
 // console.log(store.listMostRecentApps(2));
 // console.log(store.listMostPopularApps(''));
 
-let device = stores.createDevice('Iphone', [app1, app2, app3, 42]);
 
-console.log(device);
+// let device = stores.createDevice('Iphone', [app1, app2, app3, app4, store, store2]);
+// console.log(device.install('facebook'));
+
+// console.log(device.apps[0])
+
+// device.uninstall('Dory2');
 
 
+// console.log(device.listInstalled());
 
+// console.log(device.update());
+
+// все е нещо :D
 
 // store.takedownApp('Dory1');
 
 // console.log(store.search('NqmaDory')); // ok
 
 // console.log(store);
-module.exports = solve;
