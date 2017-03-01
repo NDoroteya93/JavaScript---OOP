@@ -133,21 +133,61 @@ function solve() {
                 throw new Error('Invalid pole dance type training!');
             }
         },
-        personalDataValue: function(obj) {
-            if (typeof obj !== 'object' || !(obj.hasOwnProperty('weight')) || !(obj.hasOwnProperty('fatPercentage')) || !(obj.hasOwnProperty('endurance')) || !(obj.hasOwnProperty('strength'))) {
+        personalDataValue: function(object) {
+            if (typeof object !== 'object' || !(object.hasOwnProperty('weight')) || !(object.hasOwnProperty('fatPercentage')) || !(object.hasOwnProperty('endurance')) || !(object.hasOwnProperty('strength'))) {
                 throw new Error('Invalid personal data object!');
             }
-            this.validateIntegerNumber(object.bestWeight);
+            this.validateIntegerNumber(object.weight);
             this.validateIntegerNumber(object.fatPercentage);
             this.validateIntegerNumber(object.endurance);
             this.validateIntegerNumber(object.strength);
 
-            if (object.bestWeight < 0 || object.endurance < 0 || object.strength < 0) {
+            if (object.weight < 0 || object.endurance < 0 || object.strength < 0) {
                 throw new Error('Invalid personal data!');
             }
 
             if (object.fatPercentage < 0 || object.fatPercentage > 40) {
                 throw new Error('Invalid fat Percentage!')
+            }
+        },
+        createExerciseObject: function(object) {
+            if (object.hasOwnProperty('numberOfSets') || object.hasOwnProperty('primaryMuscleGroup') || object.hasOwnProperty('secondaryMuscleGroup ') || object.hasOwnProperty('bestWeight')) {
+                try {
+                    this.validateNameLengthInclusive(object.name, 1, 30);
+                    this.validateDescription(object.description, 160);
+                    this.validateRestToTwoMinutes(object.rest, 120);
+                    this.isString(object.trainingPartner);
+                    this.isLatinLetters(object.trainingPartner);
+                    this.validatePersonalRating(object.personalRating);
+                    this.validateImprovementsStats(object.improvementStats);
+                    this.valiidateNumberOfSets(object.numberOfSets, 10);
+                    this.validateMuscleGroup(object.primaryMuscleGroup, 50);
+                    this.validateMuscleGroup(object.secondaryMuscleGroup, 75);
+                    this.bestWeightValidation(object.bestWeight, 100);
+                } catch (e) {
+                    throw new Error('Invalid object for create exercise!')
+                }
+            } else if (object.hasOwnProperty('difficulty ') || object.hasOwnProperty('type')) {
+                try {
+                    this.validateNameLengthInclusive(object.name, 1, 30);
+                    this.validateDescription(object.description, 160);
+                    this.validateRestToTwoMinutes(object.rest, 120);
+                    this.isString(object.trainingPartner);
+                    this.isLatinLetters(object.trainingPartner);
+                    this.validatePersonalRating(object.personalRating);
+                    this.validateImprovementsStats(object.improvementStats);
+                    this.difficultyPoledancing(object.difficulty);
+                    this.typePoleDancing(object.type);
+                } catch (e) {
+                    throw new Error('Invalid object for create exercise!')
+                }
+            } else {
+                throw new Error('Invalid Object for exercise!');
+            }
+        },
+        exerciseIsAdded: function(name) {
+            if (name !== -1) {
+                throw new Error('Exercise with the same name already exist!');
             }
         }
     }
@@ -387,12 +427,51 @@ function solve() {
         get schedule() {
             return this._schedule;
         }
+
+        createExercise(object) {
+            VALIDATION.createExerciseObject(object);
+            if (object.hasOwnProperty('numberOfSets') || object.hasOwnProperty('primaryMuscleGroup') || object.hasOwnProperty('secondaryMuscleGroup ') || object.hasOwnProperty('bestWeight')) {
+                const { name, description, rest, trainingPartner, personalRating, improvementStats, numberOfSets, primaryMuscleGroup, secondaryMuscleGroup, bestWeight } = object;
+                return new GymExercise(name, description, rest, trainingPartner, personalRating, improvementStats, numberOfSets, primaryMuscleGroup, secondaryMuscleGroup, bestWeight);
+            }
+            const { name, description, rest, trainingPartner, personalRating, improvementStats, difficulty, type } = object;
+
+            return new PoleDancing(name, description, rest, trainingPartner, personalRating, improvementStats, difficulty, type);
+
+        }
+
+        addExerciseToDatabase(exercise) {
+            if (Array.isArray(exercise)) {
+                for (let i = 0; i < exercise.length; i++) {
+
+                    try {
+                        VALIDATION.createExerciseObject(exercise[i]);
+                        let isAdded = this.exerciseDatabase.findIndex(x => x.name === exercise[i].name);
+                        VALIDATION.exerciseIsAdded(isAdded);
+                        this.exerciseDatabase.push(exercise[i])
+                    } catch (e) {
+
+                    }
+                }
+
+                return this;
+            }
+
+            VALIDATION.createExerciseObject(exercise);
+            let isAdded = this.exerciseDatabase.findIndex(x => x.name === exercise.name);
+            VALIDATION.exerciseIsAdded(isAdded);
+            this.exerciseDatabase.push(exercise);
+
+            return this;
+
+
+        }
     }
 
 
     return {
         createTrainingPlanner(personalData) {
-            // return new instance of Training Planner
+            return new TrainingPlanner(personalData);
         }
     };
 }
@@ -404,15 +483,35 @@ let trainingPlanner = solve();
 
 // let exercise = trainingPlanner.createExercise('Dory', 'description', 30, 'Kalinchetoy1', 10, { caloriesBurn: 400, performanceGain: 1 });
 
-let updateExercise = {
-    name: 'Georgi',
-    description: 'new description',
-    rest: 60,
+let poledance = {
+    name: 'Dory',
+    description: 'mega qkiq sport',
+    rest: 10,
+    trainingPartner: 'Tedi',
     personalRating: 9,
     improvementStats: { caloriesBurn: 700, performanceGain: 1 },
-    difficulty: 'easy',
-    type: 'dance'
+    difficulty: 'dorylevel',
+    type: 'strength'
 };
+
+let gym = {
+    name: 'Pesho',
+    description: 'train like a beast!',
+    rest: 60,
+    trainingPartner: 'Gosho',
+    personalRating: 9,
+    improvementStats: { caloriesBurn: 400, performanceGain: 1 },
+    numberOfSets: 3,
+    primaryMuscleGroup: 'chest',
+    secondaryMuscleGroup: 'back',
+    bestWeight: 40
+}
+
+let arr = [poledance, gym, poledance, {}];
+let data = { weight: 40, fatPercentage: 14, endurance: 10, strength: 50 };
+let planner = trainingPlanner.createTrainingPlanner(data);
+console.log(planner.addExerciseToDatabase(arr));
+// console.log(planner.addExerciseToDatabase(gym));
 
 // let gym = trainingPlanner.createGymExercise('Doroteya', 'description', 30, 'Pesho', 5, { caloriesBurn: 200, performanceGain: 5 }, 9, 'Gluteus max', 'Quadriceps max', 99);
 // let poleDancing = trainingPlanner.createPoleDancing('Dory', 'mega qkiq sport', 5, 'Tedi', 9, { caloriesBurn: 300, performanceGain: 10 }, 'dorylevel', 'strength');
