@@ -189,6 +189,30 @@ function solve() {
             if (name !== -1) {
                 throw new Error('Exercise with the same name already exist!');
             }
+        },
+        dayOfWeekValidate: function(day) {
+            this.isString(day);
+            if (day.toLowerCase() !== 'monday' && day !== 'tuesday' && day.toLowerCase() !== 'wednesday' && day.toLowerCase() !== 'thursday' && day.toLowerCase() !== 'friday' && day.toLowerCase() !== 'saturday' && day.toLowerCase() !== 'sunday') {
+                throw new Error('Invalid day of the week!');
+            }
+        },
+        validateInstanceOfObject: function(value) {
+            if (!(value instanceof GymExercise) || !(value instanceof PoleDancing)) {
+                throw new Error('Invalid instance of object!');
+            }
+        },
+        searchExercicePropValidation: function(object) {
+            if (typeof object !== 'object') {
+                throw new Error('Invalid object');
+            }
+            if (object.hasOwnProperty('difficulty') && object.hasOwnProperty('primaryMuscleGroup')) {
+                throw new Error('Invalid combination of properties!');
+            }
+        },
+        valiteListProperty: function(prop) {
+            if (prop === 'name') {
+                throw new Error('Property can not be name!');
+            }
         }
     }
 
@@ -198,7 +222,7 @@ function solve() {
             this.name = name;
             this.description = description;
             this.rest = rest;
-            this._trainingPartner = trainingPartner;
+            this.trainingPartner = trainingPartner;
             this.personalRating = personalRating;
             this.improvementStats = improvementStats;
         }
@@ -449,9 +473,7 @@ function solve() {
                         let isAdded = this.exerciseDatabase.findIndex(x => x.name === exercise[i].name);
                         VALIDATION.exerciseIsAdded(isAdded);
                         this.exerciseDatabase.push(exercise[i])
-                    } catch (e) {
-
-                    }
+                    } catch (e) {}
                 }
 
                 return this;
@@ -463,10 +485,130 @@ function solve() {
             this.exerciseDatabase.push(exercise);
 
             return this;
+        }
+        addExercisetoSchedule(day, exercise) {
+                VALIDATION.dayOfWeekValidate(day);
+                let self = this;
+                if (Array.isArray(exercise)) {
+                    exercise.forEach(function(x) {
+                        VALIDATION.createExerciseObject(x);
+                        self.schedule.forEach(function(y) {
+                            if (y.day === day) {
+                                y.dailyExercises.push(x);
+                            }
+                        });
+                    });
 
+                    return this;
+                }
+                VALIDATION.createExerciseObject(exercise);
+
+                this.schedule.forEach(function(x) {
+                    if (x.day === day) {
+                        x.dailyExercises.push(exercise);
+                    }
+                });
+
+                return this;
+            }
+            // dobre ti si bgcoder-a
+        updateExercise(exercise) {
+            VALIDATION.validateInstanceOfObject(exercise);
+            let findName = this.exerciseDatabase.findIndex(x => x.name === exercise.name);
+            if (findName === -1) {
+                this.exerciseDatabase.push(exercise);
+            }
+            this.exerciseDatabase[findName] = exercise;
+
+            return this;
+        }
+
+        getAllExercise() {
+            return this.exerciseDatabase
+                .slice()
+                .sort(function(a, b) {
+                    let temp = b.personalRating - a.personalRating;
+                    if (temp === 0) {
+                        return b.improvementStats['performanceGain'] - a.improvementStats['performanceGain']
+                    }
+                    return temp;
+                });
+        }
+
+        searchExercise(object) {
+            // da qsno 
+            VALIDATION.searchExercicePropValidation(object);
+            let self = this;
+
+            return this.exerciseDatabase
+                .filter(function(x) {
+                    return (!object.hasOwnProperty('trainingPartner') || object.trainingPartner === x.trainingPartner) &&
+                        (!object.hasOwnProperty('rest') || object.rest === x.rest) &&
+                        (!object.hasOwnProperty('caloriesBurn') || object.caloriesBurn === x.improvementStats.caloriesBurn) &&
+                        (!object.hasOwnProperty('primaryMuscleGroup') || object.primaryMuscleGroup === x.primaryMuscleGroup) &&
+                        (!object.hasOwnProperty('difficulty') || object.difficulty === x.difficulty);
+                });
 
         }
+
+        listExercise(count, property) {
+            try {
+                VALIDATION.validateIntegerNumber(count);
+            } catch (e) {
+                count = 10;
+            } // a _improvementStats
+
+            VALIDATION.valiteListProperty(property); // 
+
+            let checkProp = this.exerciseDatabase.some(x => x.hasOwnProperty('difficulty') || x.hasOwnProperty('type'));
+            if (checkProp) {
+
+                return this.exerciseDatabase
+                    .slice()
+                    .sort(function(a, b) {
+                        if (a[property] > b[property]) {
+                            return 1;
+                        }
+
+                        if (a[property] < b[property]) {
+                            return -1;
+                        }
+                        return 0;
+                    }) // da
+                    .slice(0, count);
+            }
+            if (property === 'description' || property === 'trainingPartner' || property === 'primaryMuscleGroup' || property === 'secondaryMuscleGroup') {
+
+                return this.exerciseDatabase
+                    .slice()
+                    .sort(function(a, b) {
+                        if (a[property] > b[property]) {
+                            return 1;
+                        }
+
+                        if (a[property] < b[property]) {
+                            return -1;
+                        }
+                        return 0;
+                    }) // da
+                    .slice(0, count);
+            }
+
+            if (property === 'caloriesBurn' || property === 'performanceGain') {
+                return this.exerciseDatabase
+                    .slice()
+                    .sort((a, b) => a.improvementStats[property] - b.improvementStats[property]) //damn
+                    .slice(0, count);
+            }
+            return this.exerciseDatabase
+                .slice()
+                .sort((a, b) => a[property] - b[property])
+                .slice(0, count);
+        }
+
+
     }
+
 
 
     return {
@@ -507,10 +649,15 @@ let gym = {
     bestWeight: 40
 }
 
-let arr = [poledance, gym, poledance, {}];
+
+let arr = [poledance, gym, poledance, gym, gym];
 let data = { weight: 40, fatPercentage: 14, endurance: 10, strength: 50 };
 let planner = trainingPlanner.createTrainingPlanner(data);
-console.log(planner.addExerciseToDatabase(arr));
+// planner.addExerciseToDatabase(arr);
+planner.addExercisetoSchedule('monday', arr);
+planner.addExerciseToDatabase(gym);
+planner.addExerciseToDatabase(poledance)
+console.log(planner.listExercise('difficulty'));
 // console.log(planner.addExerciseToDatabase(gym));
 
 // let gym = trainingPlanner.createGymExercise('Doroteya', 'description', 30, 'Pesho', 5, { caloriesBurn: 200, performanceGain: 5 }, 9, 'Gluteus max', 'Quadriceps max', 99);
