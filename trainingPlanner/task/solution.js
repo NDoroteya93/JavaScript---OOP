@@ -192,7 +192,7 @@ function solve() {
         },
         dayOfWeekValidate: function(day) {
             this.isString(day);
-            if (day.toLowerCase() !== 'monday' && day !== 'tuesday' && day.toLowerCase() !== 'wednesday' && day.toLowerCase() !== 'thursday' && day.toLowerCase() !== 'friday' && day.toLowerCase() !== 'saturday' && day.toLowerCase() !== 'sunday') {
+            if (day !== 'monday' && day !== 'tuesday' && day !== 'wednesday' && day !== 'thursday' && day !== 'friday' && day !== 'saturday' && day !== 'sunday') {
                 throw new Error('Invalid day of the week!');
             }
         },
@@ -536,7 +536,7 @@ function solve() {
         }
 
         searchExercise(object) {
-            // da qsno 
+            // da qsno
             VALIDATION.searchExercicePropValidation(object);
             let self = this;
 
@@ -558,13 +558,13 @@ function solve() {
                 count = 10;
             } // a _improvementStats
 
-            VALIDATION.valiteListProperty(property); // 
+            VALIDATION.valiteListProperty(property); //
 
             let checkProp = this.exerciseDatabase.some(x => x.hasOwnProperty('difficulty') || x.hasOwnProperty('type'));
             if (checkProp) {
 
                 return this.exerciseDatabase
-                    .slice()
+                    .filter(function(item) { return item.hasOwnProperty(property) })
                     .sort(function(a, b) {
                         if (a[property] > b[property]) {
                             return 1;
@@ -580,7 +580,7 @@ function solve() {
             if (property === 'description' || property === 'trainingPartner' || property === 'primaryMuscleGroup' || property === 'secondaryMuscleGroup') {
 
                 return this.exerciseDatabase
-                    .slice()
+                    .filter(item => item.hasOwnProperty(property))
                     .sort(function(a, b) {
                         if (a[property] > b[property]) {
                             return 1;
@@ -605,6 +605,15 @@ function solve() {
                 .sort((a, b) => a[property] - b[property])
                 .slice(0, count);
         }
+
+        getProgram(day) {
+            VALIDATION.dayOfWeekValidate(day);
+            return this.schedule
+                .filter(x => x.day === day)
+                .map(x => x.dailyExercises);
+        }
+
+
 
 
     }
@@ -655,10 +664,11 @@ let data = { weight: 40, fatPercentage: 14, endurance: 10, strength: 50 };
 let planner = trainingPlanner.createTrainingPlanner(data);
 // planner.addExerciseToDatabase(arr);
 planner.addExercisetoSchedule('monday', arr);
+console.log(planner.schedule[0].dailyExercises)
 planner.addExerciseToDatabase(gym);
-planner.addExerciseToDatabase(poledance)
-console.log(planner.listExercise('difficulty'));
-// console.log(planner.addExerciseToDatabase(gym));
+planner.addExerciseToDatabase(poledance);
+// console.log(planner.listExercise(11, 'difficulty'));
+console.log(planner.getProgram('monday'));
 
 // let gym = trainingPlanner.createGymExercise('Doroteya', 'description', 30, 'Pesho', 5, { caloriesBurn: 200, performanceGain: 5 }, 9, 'Gluteus max', 'Quadriceps max', 99);
 // let poleDancing = trainingPlanner.createPoleDancing('Dory', 'mega qkiq sport', 5, 'Tedi', 9, { caloriesBurn: 300, performanceGain: 10 }, 'dorylevel', 'strength');
