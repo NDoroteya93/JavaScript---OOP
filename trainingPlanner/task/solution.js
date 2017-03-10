@@ -137,10 +137,9 @@ function solve() {
             if (typeof object !== 'object' || !(object.hasOwnProperty('weight')) || !(object.hasOwnProperty('fatPercentage')) || !(object.hasOwnProperty('endurance')) || !(object.hasOwnProperty('strength'))) {
                 throw new Error('Invalid personal data object!');
             }
-            this.validateIntegerNumber(object.weight);
-            this.validateIntegerNumber(object.fatPercentage);
-            this.validateIntegerNumber(object.endurance);
-            this.validateIntegerNumber(object.strength);
+            if (typeof object.weight !== 'number' || isNaN(object.weight) || typeof object.fatPercentage !== 'number' || isNaN(object.fatPercentage) || typeof object.endurance !== 'number' || isNaN(object.endurance) || typeof object.strength !== 'number' || isNaN(object.strength)) {
+                throw new Error('Invalid personal data!');
+            }
 
             if (object.weight < 0 || object.endurance < 0 || object.strength < 0) {
                 throw new Error('Invalid personal data!');
@@ -747,41 +746,35 @@ function solve() {
             let getDay = this.schedule.find(x => x.day === day);
             let totalCaloriesBurn = 0;
             let totalPerformanceGain = 0;
-            getDay.dailyExercises.forEach(function(exercice) {
-                totalCaloriesBurn += exercice.improvementStats.caloriesBurn;
-                totalPerformanceGain += exercice.improvementStats.performanceGain;
-            });
 
-            this.personalData.weight = this.personalData.weight - (this.personalData.weight / totalCaloriesBurn);
-            this.personalData.fatPercentage = this.personalData.fatPercentage - (this.personalData.fatPercentage / totalCaloriesBurn);
-            this.personalData.endurance = this.personalData.endurance + (totalPerformanceGain / 100);
-            this.personalData.strength = this.personalData.strength + (totalPerformanceGain / 100);
+            if (getDay.dailyExercises.length !== 0) {
+                getDay.dailyExercises.forEach(function(exercice) {
+                    totalCaloriesBurn += exercice.improvementStats.caloriesBurn;
+                    totalPerformanceGain += exercice.improvementStats.performanceGain;
+                });
 
+
+                this.personalData.weight = this.personalData.weight - (this.personalData.weight / totalCaloriesBurn);
+                this.personalData.fatPercentage = this.personalData.fatPercentage - (this.personalData.fatPercentage / totalCaloriesBurn);
+                this.personalData.endurance = this.personalData.endurance + (totalPerformanceGain / 100);
+                this.personalData.strength = this.personalData.strength + (totalPerformanceGain / 100);
+
+            }
             return this.personalData;
-
         }
         trainWeeks(count) {
             VALIDATION.validateIntegerNumber(count);
             if (count < 0) {
                 throw new Error('Invalid days count!');
             }
-            let totalCaloriesBurn = 0;
-            let totalPerformanceGain = 0;
-            this.schedule.forEach(function(day) {
-                day.dailyExercises.forEach(function(exercice) {
-                    totalCaloriesBurn += exercice.improvementStats.caloriesBurn;
-                    totalPerformanceGain += exercice.improvementStats.performanceGain;
+            let self = this;
+
+            for (let i = 0; i < count; i++) {
+                self.schedule.forEach(function(day) {
+                    self.train(day.day);
                 })
-            });
-
-            let newPersonalData = this.personalData;
-
-            newPersonalData.weight = newPersonalData.weight - (newPersonalData.weight / totalCaloriesBurn);
-            newPersonalData.fatPercentage = newPersonalData.fatPercentage - (newPersonalData.fatPercentage / totalCaloriesBurn);
-            newPersonalData.endurance = newPersonalData.endurance + (totalPerformanceGain / 100);
-            newPersonalData.strength = newPersonalData.strength + (totalPerformanceGain / 50);
-
-            return newPersonalData;
+            }
+            return this.personalData;
 
         }
 
@@ -806,21 +799,8 @@ const newGymExercise = myTrainingPlanner.createExercise({ name: 'Valid Name Gym'
 const validGymTwo = { name: 'Valid Name Gym New', description: 'Valid Description', rest: 10, trainingPartner: 'dory', personalRating: 5, improvementStats: { caloriesBurn: 5, performanceGain: 80 }, numberOfSets: 5, primaryMuscleGroup: 'Chest', secondaryMuscleGroup: 'Triceps', bestWeight: 75 };
 const validPoleDanceTwo = { name: 'Valid Name Pole Dance New', description: 'Valid Description', rest: 20, trainingPartner: 'dory', personalRating: 5, improvementStats: { caloriesBurn: 6, performanceGain: 50 }, difficulty: 'easy', type: 'dance' };
 
-// const gymExercise = myTrainingPlanner.createExercise(validGym);
 
-// myTrainingPlanner.addExercisetoSchedule('monday', [gymExercise, gymExercise]);
-
-// let product = myTrainingPlanner.train('monday');
-
-
-// console.log(product);
-// console.log(product.weight); //(19.404);
-// console.log(product.fatPercentage); //(9.702);
-// console.log(product.endurance); //(32.4);
-// console.log(product.strength); //(42.4);
-
-
-// const gymExercise = myTrainingPlanner.createExercise(validGym);
+const gymExercise = myTrainingPlanner.createExercise(validGym);
 
 // myTrainingPlanner.addExercisetoSchedule('monday', gymExercise);
 // myTrainingPlanner.addExercisetoSchedule('tuesday', [gymExercise, gymExercise]);
@@ -829,6 +809,26 @@ const validPoleDanceTwo = { name: 'Valid Name Pole Dance New', description: 'Val
 // myTrainingPlanner.addExercisetoSchedule('friday', [gymExercise, gymExercise, gymExercise]);
 // myTrainingPlanner.addExercisetoSchedule('saturday', [gymExercise]);
 // myTrainingPlanner.addExercisetoSchedule('sunday', [gymExercise, gymExercise]);
+
+let product = myTrainingPlanner.trainWeeks(2);
+myTrainingPlanner.addExercisetoSchedule('monday', gymExercise);
+myTrainingPlanner.addExercisetoSchedule('wednesday', [gymExercise, gymExercise, gymExercise]);
+myTrainingPlanner.addExercisetoSchedule('friday', [gymExercise, gymExercise, gymExercise]);
+myTrainingPlanner.addExercisetoSchedule('saturday', [gymExercise]);
+myTrainingPlanner.addExercisetoSchedule('sunday', [gymExercise, gymExercise]);
+
+// console.log(product) //exist;
+// console.log(product.weight); //(16.405398104565627);
+// console.log(product.fatPercentage); //(8.202699052282814);
+// console.log(product.endurance); // (54.79999999999999);
+// console.log(product.strength); //(64.79999999999998);
+
+let product2 = myTrainingPlanner.trainWeeks(2);
+console.log(product2.weight); //(14.439145846467154);
+console.log(product2.fatPercentage); //(7.219572923233577);
+console.log(product2.endurance); //(70.79999999999998);
+console.log(product2.strength); // (80.79999999999998);
+
 
 // let product = myTrainingPlanner.trainWeeks(undefined);
 
