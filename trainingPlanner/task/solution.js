@@ -35,13 +35,13 @@ function solve() {
         },
         validateRestToTwoMinutes: function(value, max) {
             this.validateIntegerNumber(value);
-            if (value >= max || value < 0) {
+            if (value >= max || value <= 0) {
                 throw new Error('Invalid Rest Time! Nobody can rest for more 2 minutes!');
             }
         },
         validatePersonalRating: function(value, max) {
             this.validateIntegerNumber(value);
-            if (value > max) {
+            if (value > max || value < 0) {
                 throw new Error(`Rating must be less than ${max}!`);
             }
         },
@@ -75,7 +75,7 @@ function solve() {
             }
 
             if (obj.hasOwnProperty('personalRating')) {
-                this.validatePersonalRating(obj.personalRating);
+                this.validatePersonalRating(obj.personalRating, 10);
             }
 
             if (obj.hasOwnProperty('improvementStats')) {
@@ -137,10 +137,9 @@ function solve() {
             if (typeof object !== 'object' || !(object.hasOwnProperty('weight')) || !(object.hasOwnProperty('fatPercentage')) || !(object.hasOwnProperty('endurance')) || !(object.hasOwnProperty('strength'))) {
                 throw new Error('Invalid personal data object!');
             }
-            this.validateIntegerNumber(object.weight);
-            this.validateIntegerNumber(object.fatPercentage);
-            this.validateIntegerNumber(object.endurance);
-            this.validateIntegerNumber(object.strength);
+            if (typeof object.weight !== 'number' || isNaN(object.weight) || typeof object.fatPercentage !== 'number' || isNaN(object.fatPercentage) || typeof object.endurance !== 'number' || isNaN(object.endurance) || typeof object.strength !== 'number' || isNaN(object.strength)) {
+                throw new Error('Invalid personal data!');
+            }
 
             if (object.weight < 0 || object.endurance < 0 || object.strength < 0) {
                 throw new Error('Invalid personal data!');
@@ -151,14 +150,14 @@ function solve() {
             }
         },
         createExerciseObject: function(object) {
-            if (object.hasOwnProperty('numberOfSets') || object.hasOwnProperty('primaryMuscleGroup') || object.hasOwnProperty('secondaryMuscleGroup ') || object.hasOwnProperty('bestWeight')) {
+            if (object.hasOwnProperty('numberOfSets') || object.hasOwnProperty('primaryMuscleGroup') || object.hasOwnProperty('secondaryMuscleGroup ') || object.hasOwnProperty('bestWeight') || object.hasOwnProperty('_numberOfSets') || object.hasOwnProperty('_primaryMuscleGroup') || object.hasOwnProperty('_secondaryMuscleGroup ') || object.hasOwnProperty('_bestWeight')) {
                 try {
                     this.validateNameLengthInclusive(object.name, 1, 30);
                     this.validateDescription(object.description, 160);
                     this.validateRestToTwoMinutes(object.rest, 120);
                     this.isString(object.trainingPartner);
                     this.isLatinLetters(object.trainingPartner);
-                    this.validatePersonalRating(object.personalRating);
+                    this.validatePersonalRating(object.personalRating, 10);
                     this.validateImprovementsStats(object.improvementStats);
                     this.valiidateNumberOfSets(object.numberOfSets, 10);
                     this.validateMuscleGroup(object.primaryMuscleGroup, 50);
@@ -167,14 +166,14 @@ function solve() {
                 } catch (e) {
                     throw new Error('Invalid object for create exercise!')
                 }
-            } else if (object.hasOwnProperty('difficulty ') || object.hasOwnProperty('type')) {
+            } else if (object.hasOwnProperty('difficulty ') || object.hasOwnProperty('type') || object.hasOwnProperty('_difficulty ') || object.hasOwnProperty('_type')) {
                 try {
                     this.validateNameLengthInclusive(object.name, 1, 30);
                     this.validateDescription(object.description, 160);
                     this.validateRestToTwoMinutes(object.rest, 120);
                     this.isString(object.trainingPartner);
                     this.isLatinLetters(object.trainingPartner);
-                    this.validatePersonalRating(object.personalRating);
+                    this.validatePersonalRating(object.personalRating, 10);
                     this.validateImprovementsStats(object.improvementStats);
                     this.difficultyPoledancing(object.difficulty);
                     this.typePoleDancing(object.type);
@@ -192,14 +191,16 @@ function solve() {
         },
         dayOfWeekValidate: function(day) {
             this.isString(day);
-            if (day.toLowerCase() !== 'monday' && day !== 'tuesday' && day.toLowerCase() !== 'wednesday' && day.toLowerCase() !== 'thursday' && day.toLowerCase() !== 'friday' && day.toLowerCase() !== 'saturday' && day.toLowerCase() !== 'sunday') {
+            if (day !== 'monday' && day !== 'tuesday' && day !== 'wednesday' && day !== 'thursday' && day !== 'friday' && day !== 'saturday' && day !== 'sunday') {
                 throw new Error('Invalid day of the week!');
             }
         },
         validateInstanceOfObject: function(value) {
-            if (!(value instanceof GymExercise) || !(value instanceof PoleDancing)) {
+            // if (typeof value === 'object') {
+            if (value instanceof PoleDancing === false && value instanceof GymExercise === false) {
                 throw new Error('Invalid instance of object!');
             }
+
         },
         searchExercicePropValidation: function(object) {
             if (typeof object !== 'object') {
@@ -213,8 +214,76 @@ function solve() {
             if (prop === 'name') {
                 throw new Error('Property can not be name!');
             }
+
+            if (prop !== 'description' && prop !== 'rest' && prop !== 'trainingPartner' && prop !== 'personalRating' && prop !== 'caloriesBurn' && prop !== 'performanceGain' && prop !== 'numberOfSets' && prop !== 'primaryMuscleGroup' && prop !== 'secondaryMuscleGroup' && prop !== 'bestWeight' &&
+                prop !== 'difficulty' && prop !== 'type') {
+                throw new Error('Invalid List property!');
+            }
+        },
+        getProgramValidation: function(obj, prop) {
+            this.valiteListProperty(prop);
+
+            if (prop === 'description' || prop === 'rest' || prop === 'trainingPartner' || prop === 'personalRating' || prop === 'performanceGain' || prop === 'caloriesBurn' || prop === 'numberOfSets' || prop === 'primaryMuscleGroup' || prop === 'secondaryMuscleGroup' || prop === 'bestWeight' ||
+                prop === 'difficulty' || prop === 'type') {
+
+                if (prop === 'description') {
+                    this.validateDescription(obj[prop], 160);
+                }
+
+                if (prop === 'rest') {
+                    this.validateRestToTwoMinutes(obj[prop], 120);
+                }
+
+                if (prop === 'trainingPartner') {
+                    this.isString(obj[prop]);
+                    this.isLatinLetters(obj[prop]);
+                }
+
+                if (prop === 'personalRating') {
+                    this.validatePersonalRating(obj[prop], 10);
+                }
+
+                if (prop === 'caloriesBurn' || prop === 'performanceGain') {
+                    if (prop < 0) {
+                        throw new Error('Must be positive Integer!');
+                    }
+                }
+                if (prop === 'numberOfSets') {
+                    this.valiidateNumberOfSets(obj[prop], 10);
+                }
+
+                if (prop === 'primaryMuscleGroup') {
+                    this.validateMuscleGroup(obj[prop], 50);
+                }
+                if (prop === 'secondaryMuscleGroup') {
+                    this.validateMuscleGroup(obj[prop], 75);
+
+                }
+
+                if (prop === 'bestWeight') {
+                    this.bestWeightValidation(obj[prop], 100);
+                }
+
+                if (prop === 'difficulty') {
+                    this.difficultyPoledancing(obj[prop]);
+                }
+
+
+                if (prop === 'type') {
+                    this.typePoleDancing(obj[prop]);
+                }
+            } else {
+                throw new Error('Invalid exercise property!');
+            }
+        },
+        validatePropCombination: function(query) {
+            if ((query.hasOwnProperty('numberOfSets') || query.hasOwnProperty('primaryMuscleGroup') || query.hasOwnProperty('secondaryMuscleGroup') || query.hasOwnProperty('bestWeight')) && (query.hasOwnProperty('difficulty') || query.hasOwnProperty('type'))) {
+                throw new Error('Invalid property combination');
+            }
         }
+
     }
+
 
     // Your classes
     class Exercise {
@@ -273,7 +342,7 @@ function solve() {
         }
 
         set personalRating(value) {
-            VALIDATION.validatePersonalRating(value);
+            VALIDATION.validatePersonalRating(value, 10);
             this._personalRating = value;
         }
 
@@ -297,6 +366,9 @@ function solve() {
                 this.rest = object.rest;
             }
 
+            if (object.hasOwnProperty('trainingPartner') && object.trainingPartner !== this.trainingPartner) {
+                throw new Error('training partner can not change!');
+            }
 
 
             if (object.hasOwnProperty('personalRating')) {
@@ -523,7 +595,7 @@ function solve() {
             return this;
         }
 
-        getAllExercise() {
+        getAllExercises() {
             return this.exerciseDatabase
                 .slice()
                 .sort(function(a, b) {
@@ -535,8 +607,8 @@ function solve() {
                 });
         }
 
-        searchExercise(object) {
-            // da qsno 
+        searchExercises(object) {
+            // da qsno
             VALIDATION.searchExercicePropValidation(object);
             let self = this;
 
@@ -551,20 +623,20 @@ function solve() {
 
         }
 
-        listExercise(count, property) {
+        listExercises(count, property) {
             try {
                 VALIDATION.validateIntegerNumber(count);
             } catch (e) {
                 count = 10;
-            } // a _improvementStats
+            }
 
-            VALIDATION.valiteListProperty(property); // 
+            VALIDATION.valiteListProperty(property); //
 
             let checkProp = this.exerciseDatabase.some(x => x.hasOwnProperty('difficulty') || x.hasOwnProperty('type'));
-            if (checkProp) {
+            if (property === 'difficulty' || property === 'type') {
 
                 return this.exerciseDatabase
-                    .slice()
+                    .filter(function(item) { return item.hasOwnProperty(property) })
                     .sort(function(a, b) {
                         if (a[property] > b[property]) {
                             return 1;
@@ -580,7 +652,7 @@ function solve() {
             if (property === 'description' || property === 'trainingPartner' || property === 'primaryMuscleGroup' || property === 'secondaryMuscleGroup') {
 
                 return this.exerciseDatabase
-                    .slice()
+                    .filter(item => item.hasOwnProperty(property))
                     .sort(function(a, b) {
                         if (a[property] > b[property]) {
                             return 1;
@@ -595,10 +667,12 @@ function solve() {
             }
 
             if (property === 'caloriesBurn' || property === 'performanceGain') {
-                return this.exerciseDatabase
+                let sum = this.exerciseDatabase
                     .slice()
                     .sort((a, b) => a.improvementStats[property] - b.improvementStats[property]) //damn
                     .slice(0, count);
+
+                return sum;
             }
             return this.exerciseDatabase
                 .slice()
@@ -606,59 +680,353 @@ function solve() {
                 .slice(0, count);
         }
 
+        getProgram(query) {
+            if (typeof query === 'object') {
+                let getKeys = Object.keys(query);
+                getKeys.forEach(x => VALIDATION.getProgramValidation(query, x));
+                VALIDATION.validatePropCombination(query);
+
+                let result = [];
+                this.schedule.forEach(function(x) {
+                    let dayOfWeek = x.dailyExercises.some(function(exercise) {
+                        return getKeys.every(function(prop) {
+                            if (prop === 'caloriesBurn' || prop === 'performanceGain') {
+                                return query[prop] === exercise.improvementStats[prop];
+                            }
+
+                            return query[prop] === exercise[`_${prop}`];
+                        });
+                    })
+
+                    if (dayOfWeek) {
+                        result.push(x.day);
+                    }
+                });
+
+                return result.filter((day, index, array) => day !== array[index - 1]);
+
+
+            }
+            VALIDATION.dayOfWeekValidate(query);
+            return this.schedule
+                .find(x => x.day === query)
+                .dailyExercises;
+
+        }
+
+        getWeeklySchedule() {
+            let sort = this.schedule
+                .slice()
+                .sort(function(a, b) {
+                    let arrayA = a.dailyExercises;
+                    let arrayB = b.dailyExercises;
+
+
+                    let sumA = arrayA.reduce(function(prev, cur) {
+                        let sum = prev + cur.personalRating;
+                        return sum;
+                    }, 0);
+
+                    let sumB = arrayB.reduce(function(prev, cur) {
+                        let sum = prev + cur.personalRating;
+                        return sum;
+                    }, 0);
+                    let sortItem = sumA - sumB;
+
+                    return sortItem;
+
+                });
+
+            return sort;
+        }
+
+        train(day) {
+            VALIDATION.dayOfWeekValidate(day);
+
+            let getDay = this.schedule.find(x => x.day === day);
+            let totalCaloriesBurn = 0;
+            let totalPerformanceGain = 0;
+
+            if (getDay.dailyExercises.length !== 0) {
+                getDay.dailyExercises.forEach(function(exercice) {
+                    totalCaloriesBurn += exercice.improvementStats.caloriesBurn;
+                    totalPerformanceGain += exercice.improvementStats.performanceGain;
+                });
+
+
+                this.personalData.weight = this.personalData.weight - (this.personalData.weight / totalCaloriesBurn);
+                this.personalData.fatPercentage = this.personalData.fatPercentage - (this.personalData.fatPercentage / totalCaloriesBurn);
+                this.personalData.endurance = this.personalData.endurance + (totalPerformanceGain / 100);
+                this.personalData.strength = this.personalData.strength + (totalPerformanceGain / 100);
+
+            }
+            return this.personalData;
+        }
+        trainWeeks(count) {
+            VALIDATION.validateIntegerNumber(count);
+            if (count < 0) {
+                throw new Error('Invalid days count!');
+            }
+            let self = this;
+
+            for (let i = 0; i < count; i++) {
+                self.schedule.forEach(function(day) {
+                    self.train(day.day);
+                })
+            }
+            return this.personalData;
+
+        }
 
     }
-
-
-
     return {
         createTrainingPlanner(personalData) {
             return new TrainingPlanner(personalData);
         }
-    };
+    }
 }
+
 
 // Submit the code above this line in bgcoder.com
 module.exports = solve;
 
-let trainingPlanner = solve();
-
-// let exercise = trainingPlanner.createExercise('Dory', 'description', 30, 'Kalinchetoy1', 10, { caloriesBurn: 400, performanceGain: 1 });
-
-let poledance = {
-    name: 'Dory',
-    description: 'mega qkiq sport',
-    rest: 10,
-    trainingPartner: 'Tedi',
-    personalRating: 9,
-    improvementStats: { caloriesBurn: 700, performanceGain: 1 },
-    difficulty: 'dorylevel',
-    type: 'strength'
-};
-
-let gym = {
-    name: 'Pesho',
-    description: 'train like a beast!',
-    rest: 60,
-    trainingPartner: 'Gosho',
-    personalRating: 9,
-    improvementStats: { caloriesBurn: 400, performanceGain: 1 },
-    numberOfSets: 3,
-    primaryMuscleGroup: 'chest',
-    secondaryMuscleGroup: 'back',
-    bestWeight: 40
-}
+let result = solve();
+const validTrainingPlannerObject = { weight: 20, fatPercentage: 10, endurance: 30, strength: 40 };
+const validGym = { name: 'Valid Name Gym', description: 'Valid Description', rest: 60, trainingPartner: 'Gosho', personalRating: 5, improvementStats: { caloriesBurn: 50, performanceGain: 80 }, numberOfSets: 5, primaryMuscleGroup: 'Chest', secondaryMuscleGroup: 'Triceps', bestWeight: 75 };
+const validPoleDance = { name: 'Valid Name Pole Dance', description: 'Valid Description', rest: 60, trainingPartner: 'Gosho', personalRating: 5, improvementStats: { caloriesBurn: 50, performanceGain: 50 }, difficulty: 'dorylevel', type: 'dance' };
+const myTrainingPlanner = result.createTrainingPlanner(validTrainingPlannerObject);
+const newGymExercise = myTrainingPlanner.createExercise({ name: 'Valid Name Gym', description: 'Valid Description', rest: 20, trainingPartner: 'Gosho', personalRating: 5, improvementStats: { caloriesBurn: 50, performanceGain: 50 }, numberOfSets: 5, primaryMuscleGroup: 'Chest', secondaryMuscleGroup: 'Triceps', bestWeight: 75 });
+const validGymTwo = { name: 'Valid Name Gym New', description: 'Valid Description', rest: 10, trainingPartner: 'dory', personalRating: 5, improvementStats: { caloriesBurn: 5, performanceGain: 80 }, numberOfSets: 5, primaryMuscleGroup: 'Chest', secondaryMuscleGroup: 'Triceps', bestWeight: 75 };
+const validPoleDanceTwo = { name: 'Valid Name Pole Dance New', description: 'Valid Description', rest: 20, trainingPartner: 'dory', personalRating: 5, improvementStats: { caloriesBurn: 6, performanceGain: 50 }, difficulty: 'easy', type: 'dance' };
 
 
-let arr = [poledance, gym, poledance, gym, gym];
-let data = { weight: 40, fatPercentage: 14, endurance: 10, strength: 50 };
-let planner = trainingPlanner.createTrainingPlanner(data);
-// planner.addExerciseToDatabase(arr);
-planner.addExercisetoSchedule('monday', arr);
-planner.addExerciseToDatabase(gym);
-planner.addExerciseToDatabase(poledance)
-console.log(planner.listExercise('difficulty'));
-// console.log(planner.addExerciseToDatabase(gym));
+const gymExercise = myTrainingPlanner.createExercise(validGym);
+
+// myTrainingPlanner.addExercisetoSchedule('monday', gymExercise);
+// myTrainingPlanner.addExercisetoSchedule('tuesday', [gymExercise, gymExercise]);
+// myTrainingPlanner.addExercisetoSchedule('wednesday', [gymExercise, gymExercise, gymExercise]);
+// myTrainingPlanner.addExercisetoSchedule('thursday', [gymExercise, gymExercise]);
+// myTrainingPlanner.addExercisetoSchedule('friday', [gymExercise, gymExercise, gymExercise]);
+// myTrainingPlanner.addExercisetoSchedule('saturday', [gymExercise]);
+// myTrainingPlanner.addExercisetoSchedule('sunday', [gymExercise, gymExercise]);
+
+let product = myTrainingPlanner.trainWeeks(2);
+myTrainingPlanner.addExercisetoSchedule('monday', gymExercise);
+myTrainingPlanner.addExercisetoSchedule('wednesday', [gymExercise, gymExercise, gymExercise]);
+myTrainingPlanner.addExercisetoSchedule('friday', [gymExercise, gymExercise, gymExercise]);
+myTrainingPlanner.addExercisetoSchedule('saturday', [gymExercise]);
+myTrainingPlanner.addExercisetoSchedule('sunday', [gymExercise, gymExercise]);
+
+// console.log(product) //exist;
+// console.log(product.weight); //(16.405398104565627);
+// console.log(product.fatPercentage); //(8.202699052282814);
+// console.log(product.endurance); // (54.79999999999999);
+// console.log(product.strength); //(64.79999999999998);
+
+let product2 = myTrainingPlanner.trainWeeks(2);
+console.log(product2.weight); //(14.439145846467154);
+console.log(product2.fatPercentage); //(7.219572923233577);
+console.log(product2.endurance); //(70.79999999999998);
+console.log(product2.strength); // (80.79999999999998);
+
+
+// let product = myTrainingPlanner.trainWeeks(undefined);
+
+// console.log(product); //exist;
+// console.log(product.weight); //(16.405398104565627);
+// console.log(product.fatPercentage); //(8.202699052282814);
+// console.log(product.endurance); //(54.79999999999999);
+// console.log(product.strength); //(64.79999999999998);
+
+
+// // let exercise = trainingPlanner.createExercise('Dory', 'description', 30, 'Kalinchetoy1', 10, { caloriesBurn: 400, performanceGain: 1 });
+
+// let poledance = {
+//     name: 'Dory',
+//     description: 'mega qkiq sport',
+//     rest: 10,
+//     trainingPartner: 'Tedi',
+//     personalRating: 9,
+//     improvementStats: { caloriesBurn: 700, performanceGain: 19 },
+//     difficulty: 'dorylevel',
+//     type: 'strength'
+// };
+
+// let gym = {
+//     name: 'Pesho',
+//     description: 'train like a beast!',
+//     rest: 60,
+//     trainingPartner: 'Gosho',
+//     personalRating: 9,
+//     improvementStats: { caloriesBurn: 400, performanceGain: 17 },
+//     numberOfSets: 3,
+//     primaryMuscleGroup: 'chest',
+//     secondaryMuscleGroup: 'back',
+//     bestWeight: 40
+// }
+
+// let poledance2 = {
+//     name: 'Dory',
+//     description: 'mega qkiq sport',
+//     rest: 10,
+//     trainingPartner: 'Tedi',
+//     personalRating: 96,
+//     improvementStats: { caloriesBurn: 700, performanceGain: 11 },
+//     difficulty: 'dorylevel',
+//     type: 'strength'
+// };
+
+// let gym2 = {
+//     name: 'PeshoTwo',
+//     description: 'train like a beast!',
+//     rest: 60,
+//     trainingPartner: 'Gosho',
+//     personalRating: 69,
+//     improvementStats: { caloriesBurn: 400, performanceGain: 45 },
+//     numberOfSets: 3,
+//     primaryMuscleGroup: 'chest',
+//     secondaryMuscleGroup: 'back',
+//     bestWeight: 40
+// }
+
+
+
+// let arr = [poledance, gym, poledance, gym, gym];
+
+// let arr2 = [{
+//         name: 'DoryTwo',
+//         description: 'mega qkiq sport',
+//         rest: 10,
+//         trainingPartner: 'Tedi',
+//         personalRating: 11,
+//         improvementStats: { caloriesBurn: 700, performanceGain: 1 },
+//         difficulty: 'dorylevel',
+//         type: 'strength'
+//     },
+//     {
+//         name: 'Pesho',
+//         description: 'train like a beast!',
+//         rest: 60,
+//         trainingPartner: 'Gosho',
+//         personalRating: 10,
+//         improvementStats: { caloriesBurn: 400, performanceGain: 1 },
+//         numberOfSets: 3,
+//         primaryMuscleGroup: 'chest',
+//         secondaryMuscleGroup: 'back',
+//         bestWeight: 40
+//     },
+//     {
+//         name: 'DoryTwo',
+//         description: 'mega qkiq sport',
+//         rest: 10,
+//         trainingPartner: 'Tedi',
+//         personalRating: 9,
+//         improvementStats: { caloriesBurn: 700, performanceGain: 1 },
+//         difficulty: 'dorylevel',
+//         type: 'strength'
+//     },
+//     {
+//         name: 'Peshotwo',
+//         description: 'train like a beast!',
+//         rest: 60,
+//         trainingPartner: 'Gosho',
+//         personalRating: 8,
+//         improvementStats: { caloriesBurn: 400, performanceGain: 1 },
+//         numberOfSets: 3,
+//         primaryMuscleGroup: 'chest',
+//         secondaryMuscleGroup: 'back',
+//         bestWeight: 40
+//     },
+//     {
+//         name: 'PeshoTwo',
+//         description: 'train like a beast!',
+//         rest: 60,
+//         trainingPartner: 'Gosho',
+//         personalRating: 7,
+//         improvementStats: { caloriesBurn: 400, performanceGain: 1 },
+//         numberOfSets: 3,
+//         primaryMuscleGroup: 'chest',
+//         secondaryMuscleGroup: 'back',
+//         bestWeight: 40
+//     }
+// ];
+
+// let arr3 = [{
+//         name: 'Dory',
+//         description: 'mega qkiq sport',
+//         rest: 10,
+//         trainingPartner: 'Tedi',
+//         personalRating: 21,
+//         improvementStats: { caloriesBurn: 700, performanceGain: 1 },
+//         difficulty: 'dorylevel',
+//         type: 'strength'
+//     },
+//     {
+//         name: 'PeshoTwo',
+//         description: 'train like a beast!',
+//         rest: 60,
+//         trainingPartner: 'Gosho',
+//         personalRating: 99,
+//         improvementStats: { caloriesBurn: 400, performanceGain: 1 },
+//         numberOfSets: 3,
+//         primaryMuscleGroup: 'chest',
+//         secondaryMuscleGroup: 'back',
+//         bestWeight: 40
+//     },
+//     {
+//         name: 'DoryThree',
+//         description: 'mega qkiq sport',
+//         rest: 10,
+//         trainingPartner: 'Tedi',
+//         personalRating: 15,
+//         improvementStats: { caloriesBurn: 700, performanceGain: 1 },
+//         difficulty: 'dorylevel',
+//         type: 'strength'
+//     },
+//     {
+//         name: 'PeshoThree',
+//         description: 'train like a beast!',
+//         rest: 60,
+//         trainingPartner: 'Gosho',
+//         personalRating: 14,
+//         improvementStats: { caloriesBurn: 400, performanceGain: 1 },
+//         numberOfSets: 3,
+//         primaryMuscleGroup: 'chest',
+//         secondaryMuscleGroup: 'back',
+//         bestWeight: 40
+//     },
+//     {
+//         name: 'PeshoThree',
+//         description: 'train like a beast!',
+//         rest: 60,
+//         trainingPartner: 'Gosho',
+//         personalRating: 13,
+//         improvementStats: { caloriesBurn: 400, performanceGain: 1 },
+//         numberOfSets: 3,
+//         primaryMuscleGroup: 'chest',
+//         secondaryMuscleGroup: 'back',
+//         bestWeight: 40
+//     }
+// ];
+// // let arr2 = [poledance2, gym2];
+// let data = { weight: 40, fatPercentage: 14, endurance: 10, strength: 50 };
+// let planner = trainingPlanner.createTrainingPlanner(data);
+// // planner.addExerciseToDatabase(arr);
+// planner.addExercisetoSchedule('monday', arr);
+// planner.addExercisetoSchedule('thursday', arr2);
+// planner.addExercisetoSchedule('sunday', arr3);
+// // planner.addExercisetoSchedule('sunday', arr2);
+// // console.log(planner.schedule[0].dailyExercises)
+// planner.addExerciseToDatabase(gym);
+// planner.addExerciseToDatabase(poledance);
+// // console.log(planner.listExercise(11, 'difficulty'));
+// // console.log(planner.getProgram({ secondaryMuscleGroup: 'back', bestWeight: 40 }));
+// // console.log(planner.schedule[0].dailyExercises);
+
+// console.log(planner.getWeeklySchedule());
+// console.log(planner.schedule[0].dailyExercises);
+// console.log(planner.train('thu'));
+
 
 // let gym = trainingPlanner.createGymExercise('Doroteya', 'description', 30, 'Pesho', 5, { caloriesBurn: 200, performanceGain: 5 }, 9, 'Gluteus max', 'Quadriceps max', 99);
 // let poleDancing = trainingPlanner.createPoleDancing('Dory', 'mega qkiq sport', 5, 'Tedi', 9, { caloriesBurn: 300, performanceGain: 10 }, 'dorylevel', 'strength');
